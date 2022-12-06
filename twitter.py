@@ -94,7 +94,7 @@ if __name__ == "__main__":
     api = connect_to_twitter_api()
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
     today = datetime.today()
-    date = today - timedelta(days=2)
+    date = today - timedelta(days=1)
     date = date.strftime("%Y-%m-%d")
 
     tweets = clean_tweets(find_positions(api, phd_keywords, date))
