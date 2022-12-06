@@ -58,7 +58,7 @@ def compose_email(customers_name, positions_source, positions, base_path):
         "&greeting_image_place_holder", greeting_image_path
     )
 
-    title_text = "Ph.D. positions from Twitter"
+    title_text = f"Ph.D. positions from {positions_source}"
     email_template = email_template.replace("&title_place_holder", title_text)
 
     today = datetime.today().strftime("%B %d, %Y")

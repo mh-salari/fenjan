@@ -82,11 +82,11 @@ def filter_positions(positions, keywords):
 
 def compose_and_send_email(email_address, customers_name, positions, base_path):
 
-    email_template = email_template = compose_email(
+    email_text = email_template = compose_email(
         customers_name, "Twitter", positions, base_path
     )
 
-    send_email(email_address, "PhD Positions from Twitter", email_template, "html")
+    send_email(email_address, "PhD Positions from Twitter", email_text, "html")
 
 
 if __name__ == "__main__":

@@ -120,9 +120,10 @@ def filter_positions(positions, keywords):
     return results
 
 
-def compose_and_send_email(email_address, related_positions):
+def compose_and_send_email(email_address, customers_name, positions, base_path):
 
-    email_text = compose_email(related_positions)
+    email_text = compose_email(customers_name, "LinkedIn", positions, base_path)
+
     send_email(email_address, "PhD Positions from LinkedIn", email_text, "html")
 
 
