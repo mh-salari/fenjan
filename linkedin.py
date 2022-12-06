@@ -12,7 +12,6 @@ Sources:
 """
 
 
-
 import os
 import time
 from tqdm import tqdm
@@ -128,6 +127,9 @@ def compose_and_send_email(email_address, related_positions):
 
 
 if __name__ == "__main__":
+
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
+
     load_dotenv()
     print("Opening Chrome")
     driver = make_driver()
@@ -151,5 +153,7 @@ if __name__ == "__main__":
             related_positions = filter_positions(positions, keywords)
             if related_positions:
                 print(f"sending email to: {customer['name']}")
-                compose_and_send_email(customer["email"], related_positions)
+                compose_and_send_email(
+                    customer["email"], customer["name"], related_positions, base_path
+                )
                 time.sleep(10)

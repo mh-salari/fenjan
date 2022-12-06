@@ -10,7 +10,6 @@ Sources:
 """
 
 
-
 import os
 from tqdm import tqdm
 from dotenv import load_dotenv
@@ -68,7 +67,7 @@ def clean_tweets(tweets):
         if description not in _positions:
             _positions.append(f"{description}")
             positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}\nby:{tweet.user.name}\n{description}\n{url}"
+                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}\nby:{tweet.user.name}\n\n{description}\n\n{url}"
             )
     return positions
 
@@ -81,18 +80,21 @@ def filter_positions(positions, keywords):
     return results
 
 
-def compose_and_send_email(email_address, positions):
+def compose_and_send_email(email_address, customers_name, positions, base_path):
 
-    email_text = compose_email(positions)
-    send_email(email_address, "PhD Positions from Twitter", email_text, "html")
+    email_template = email_template = compose_email(
+        customers_name, "Twitter", positions, base_path
+    )
+
+    send_email(email_address, "PhD Positions from Twitter", email_template, "html")
 
 
 if __name__ == "__main__":
 
     api = connect_to_twitter_api()
-
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
     today = datetime.today()
-    date = today - timedelta(days=1)
+    date = today - timedelta(days=2)
     date = date.strftime("%Y-%m-%d")
 
     tweets = clean_tweets(find_positions(api, phd_keywords, date))
@@ -106,4 +108,6 @@ if __name__ == "__main__":
             related_positions = filter_positions(tweets, keywords)
             if related_positions:
                 tqdm.write(f"sending email to: {customer['name']}")
-                compose_and_send_email(customer["email"], related_positions)
+                compose_and_send_email(
+                    customer["email"], customer["name"], related_positions, base_path
+                )
