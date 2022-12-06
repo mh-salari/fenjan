@@ -1,4 +1,15 @@
-# https://towardsdatascience.com/how-to-extract-data-from-the-twitter-api-using-python-b6fbd7129a33
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Des 6 2022
+@author: Hue (MohammadHossein) Salari
+@email:hue.salari@gmail.com
+
+Sources: 
+    - https://towardsdatascience.com/how-to-extract-data-from-the-twitter-api-using-python-b6fbd7129a33
+"""
+
+
 
 import os
 from tqdm import tqdm

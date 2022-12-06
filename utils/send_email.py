@@ -1,6 +1,16 @@
-# https://mljar.com/blog/python-send-email/
-# https://support.google.com/accounts/answer/185833
-# https://support.google.com/mail/answer/7126229?hl=en#zippy=%2Cstep-check-that-imap-is-turned-on
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Des 6 2022
+@author: Hue (MohammadHossein) Salari
+@email:hue.salari@gmail.com
+
+Sources: 
+
+    - https://mljar.com/blog/python-send-email/
+    - https://support.google.com/accounts/answer/185833
+    - https://support.google.com/mail/answer/7126229?hl=en#zippy=%2Cstep-check-that-imap-is-turned-on
+"""
 
 import os
 from dotenv import load_dotenv

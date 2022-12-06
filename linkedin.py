@@ -1,6 +1,17 @@
-# https://www.geeksforgeeks.org/scrape-linkedin-using-selenium-and-beautiful-soup-in-python/
-# https://stackoverflow.com/questions/64717302/deprecationwarning-executable-path-has-been-deprecated-selenium-python
-# https://stackoverflow.com/questions/32391303/how-to-scroll-to-the-end-of-the-page-using-selenium-in-python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Des 6 2022
+@author: Hue (MohammadHossein) Salari
+@email:hue.salari@gmail.com
+
+Sources: 
+    - https://www.geeksforgeeks.org/scrape-linkedin-using-selenium-and-beautiful-soup-in-python/
+    - https://stackoverflow.com/questions/64717302/deprecationwarning-executable-path-has-been-deprecated-selenium-python
+    - https://stackoverflow.com/questions/32391303/how-to-scroll-to-the-end-of-the-page-using-selenium-in-python
+"""
+
+
 
 import os
 import time
