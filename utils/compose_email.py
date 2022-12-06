@@ -68,7 +68,7 @@ def compose_email(customers_name, positions_source, positions, base_path):
     email_template = email_template.replace("&greeting_place_holder", greeting_text)
 
     position_template = ""
-    position_template_path = "/media/hue/Data/codes/fenjan/utils/position_template.html"
+    position_template_path = os.path.join(base_path, "position_template.html")
     with open(position_template_path, "r") as f:
         position_template = f.read()
 
