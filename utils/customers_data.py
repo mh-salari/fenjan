@@ -41,6 +41,10 @@ customers_data = [
             "Life cycle analysis",
             "Sustainability",
             "Sustainable",
+            "BIM",
+            "Building",
+            "Cementitious material",
+            "Recycled Aggregate",
         ],
     },
 ]
