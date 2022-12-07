@@ -113,7 +113,14 @@ def find_positions(driver, phd_keywords):
                     ] = f'{position_text}\nhttps://www.linkedin.com/feed/update/{links["data-urn"]}'
             except:
                 pass
-    return list(set(positions))
+
+    positions = list(set(positions))
+    for p in positions:
+        if len(p) > 73:
+            if p[:-73] in positions:
+                positions.remove(p)
+
+    return positions
 
 
 def filter_positions(positions, keywords):
