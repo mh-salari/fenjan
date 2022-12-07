@@ -34,7 +34,7 @@ from utils.customers_data import customers_data
 
 def make_driver():
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
@@ -60,13 +60,19 @@ def login_to_linkedin(driver):
 
 def find_positions(driver, phd_keywords):
     _positions = []
+    _raw_positions = []
     positions = []
+
+    url = "https://www.linkedin.com/search/results/"
+    driver.get(url)
+    time.sleep(5)
     for keyword in tqdm(phd_keywords):
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         driver.get(url)
+        time.sleep(5)
         for _ in tqdm(range(10), leave=False):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(6)
+            time.sleep(5)
 
         src = driver.page_source
         soup = BeautifulSoup(src, "lxml")
@@ -102,12 +108,13 @@ def find_positions(driver, phd_keywords):
                         "class": "update-components-text relative feed-shared-update-v2__commentary"
                     },
                 ).text.strip()
-                if position_text:
+                if position_text and position_text not in _raw_positions:
                     positions[
                         positions.index(position_text)
                     ] = f'{position_text}\nhttps://www.linkedin.com/feed/update/{links["data-urn"]}'
             except:
                 pass
+        _raw_positions += [position.text.strip() for position in _positions]
 
     return list(set(positions))
 
