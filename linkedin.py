@@ -60,7 +60,6 @@ def login_to_linkedin(driver):
 
 def find_positions(driver, phd_keywords):
     _positions = []
-    _raw_positions = []
     positions = []
 
     url = "https://www.linkedin.com/search/results/"
@@ -69,7 +68,7 @@ def find_positions(driver, phd_keywords):
     for keyword in tqdm(phd_keywords):
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         driver.get(url)
-        time.sleep(5)
+        time.sleep(10)
         for _ in tqdm(range(10), leave=False):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(5)
@@ -108,14 +107,12 @@ def find_positions(driver, phd_keywords):
                         "class": "update-components-text relative feed-shared-update-v2__commentary"
                     },
                 ).text.strip()
-                if position_text and position_text not in _raw_positions:
+                if position_text:
                     positions[
                         positions.index(position_text)
                     ] = f'{position_text}\nhttps://www.linkedin.com/feed/update/{links["data-urn"]}'
             except:
                 pass
-        _raw_positions += [position.text.strip() for position in _positions]
-
     return list(set(positions))
 
 
