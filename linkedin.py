@@ -68,10 +68,10 @@ def find_positions(driver, phd_keywords):
     for keyword in tqdm(phd_keywords):
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         driver.get(url)
-        time.sleep(10)
+        time.sleep(30)
         for _ in tqdm(range(10), leave=False):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
+            time.sleep(10)
 
         src = driver.page_source
         soup = BeautifulSoup(src, "lxml")
