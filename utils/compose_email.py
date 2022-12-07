@@ -63,7 +63,7 @@ def compose_email(customers_name, positions_source, positions, base_path):
 
     today = datetime.today().strftime("%B %d, %Y")
     greeting_text = f"""Dear {customers_name},<br> 
-    I am pleased to present to you a list of fully funded Ph.D. positions that have been advertised on {positions_source} in the past 24 hours.<br>
+    I am pleased to present to you a list of Ph.D. positions that have been advertised on {positions_source} in the past 24 hours.<br><br>
     {today}"""
     email_template = email_template.replace("&greeting_place_holder", greeting_text)
 
