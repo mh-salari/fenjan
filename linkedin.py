@@ -17,6 +17,7 @@ import time
 from tqdm import tqdm
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import re
 
 from bs4 import BeautifulSoup
 
@@ -115,10 +116,18 @@ def find_positions(driver, phd_keywords):
                 pass
 
     positions = list(set(positions))
-    for p in positions:
-        if len(p) > 73:
-            if p[:-73] in positions:
-                positions.remove(p)
+
+    for position in positions:
+        result = re.sub(
+            r"https:\/\/www\.linkedin\.com\/feed\/update\/urn:li:activity:\d+",
+            "",
+            position,
+        ).strip()
+        if result != position:
+            try:
+                positions.remove(result)
+            except:
+                pass
 
     return positions
 
