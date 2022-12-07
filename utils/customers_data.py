@@ -45,6 +45,11 @@ customers_data = [
             "Building",
             "Cementitious material",
             "Recycled Aggregate",
+            "Zero energy",
+            "Low_carbon",
+            "Bio energy",
+            "Climate",
+            "Digital twin",
         ],
     },
 ]
