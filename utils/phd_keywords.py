@@ -6,13 +6,13 @@ Created on Des 6 2022
 @email:hue.salari@gmail.com
 """
 phd_keywords = [
-    "Funded phd",
+    "funded phd",
     "phd position",
-    "Recruiting phd",
-    "PhD fellowship",
-    "Recruiting for a phd",
-    "PhD opportunity",
+    "recruiting phd",
+    "phd fellowship",
+    "recruiting for phd",
+    "phd opportunity",
     "hiring phd student",
-    "potential PhD",
-    "#phdposition",
+    "potential phd",
+    "phdposition",
 ]
