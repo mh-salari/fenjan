@@ -1,5 +1,7 @@
 /utils/images/high_quality/
 utils/test.html
+*.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

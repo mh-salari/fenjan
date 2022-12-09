@@ -11,6 +11,7 @@ Sources:
 
 
 import os
+import logging as log
 from tqdm import tqdm
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -21,6 +22,11 @@ from utils.send_email import send_email
 from utils.compose_email import compose_email
 from utils.phd_keywords import phd_keywords
 from utils.customers_data import customers_data
+
+log_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "twitter.log")
+log.basicConfig(
+    level=log.INFO, filename=log_path, format="%(asctime)s %(levelname)s %(message)s"
+)
 
 
 def connect_to_twitter_api():
@@ -90,7 +96,7 @@ def compose_and_send_email(email_address, customers_name, positions, base_path):
 
 
 if __name__ == "__main__":
-
+    log.info(f"Searching Twitter for Ph.D. Positions")
     api = connect_to_twitter_api()
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
     today = datetime.today()
@@ -98,6 +104,7 @@ if __name__ == "__main__":
     date = date.strftime("%Y-%m-%d")
 
     tweets = clean_tweets(find_positions(api, phd_keywords, date))
+    log.info(f"Found {len(tweets)} tweets related to Ph.D. Positions")
 
     for customer in customers_data:
         if customer["expiration_date"] >= today:
@@ -107,6 +114,9 @@ if __name__ == "__main__":
             )
             related_positions = filter_positions(tweets, keywords)
             if related_positions:
+                log.info(
+                    f"Sending email containing {len(related_positions)} positions to: {customer['name']}"
+                )
                 tqdm.write(f"sending email to: {customer['name']}")
                 compose_and_send_email(
                     customer["email"], customer["name"], related_positions, base_path

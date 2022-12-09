@@ -14,6 +14,7 @@ Sources:
 
 import os
 import time
+import logging as log
 from tqdm import tqdm
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -31,6 +32,11 @@ from utils.compose_email import compose_email
 
 from utils.phd_keywords import phd_keywords
 from utils.customers_data import customers_data
+
+log_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "twitter.log")
+log.basicConfig(
+    level=log.INFO, filename=log_path, format="%(asctime)s %(levelname)s %(message)s"
+)
 
 
 def make_driver():
@@ -149,6 +155,7 @@ def compose_and_send_email(email_address, customers_name, positions, base_path):
 
 if __name__ == "__main__":
 
+    log.info(f"Searching LinkedIn for Ph.D. Positions")
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
 
     load_dotenv()
@@ -160,7 +167,7 @@ if __name__ == "__main__":
     positions = find_positions(driver, phd_keywords[:])
     driver.quit()
     print(f"Total number of positions: {len(positions)}")
-
+    log.info(f"Found {len(positions)} posts related to Ph.D. Positions")
     today = datetime.today()
     date = today - timedelta(days=1)
     date = date.strftime("%Y-%m-%d")
@@ -173,6 +180,9 @@ if __name__ == "__main__":
             )
             related_positions = filter_positions(positions, keywords)
             if related_positions:
+                log.info(
+                    f"Sending email containing {len(related_positions)} positions to: {customer['name']}"
+                )
                 print(f"sending email to: {customer['name']}")
                 compose_and_send_email(
                     customer["email"], customer["name"], related_positions, base_path
