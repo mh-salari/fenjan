@@ -15,4 +15,5 @@ phd_keywords = [
     "hiring phd student",
     "potential phd",
     "phdposition",
+    "looking for phd",
 ]
