@@ -33,7 +33,7 @@ from utils.compose_email import compose_email
 from utils.phd_keywords import phd_keywords
 from utils.customers_data import customers_data
 
-log_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "twitter.log")
+log_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "linkedin.log")
 log.basicConfig(
     level=log.INFO, filename=log_path, format="%(asctime)s %(levelname)s %(message)s"
 )
