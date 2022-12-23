@@ -23,7 +23,7 @@ def format_position_summery_text(text):
                     '<span style="color:#68677b">' + word + "</span>" + " "
                 )
             elif url:
-                formatted_text += (
+                formatted_text += " " + (
                     f'<a href="{url[0]}" rel="noopener" style="text-decoration: underline; color: #8a3b8f;" target="_blank">{url[0]}</a>'
                     + word.replace(url[0], "")
                     + " "
