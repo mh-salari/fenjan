@@ -274,13 +274,12 @@ def main():
     log.info(f"Found {len(all_positions)} posts related to Ph.D. Positions")
     # get yesterday's date
     yesterday = datetime.today() - timedelta(days=1)
-    date_string = yesterday.strftime("%Y-%m-%d")
-
     for customer in customers_data:
         if customer["expiration_date"] >= yesterday:
             # get customer keywords and make them lowercase and remove spaces
             keywords = set(
                 [keyword.replace(" ", "").lower() for keyword in customer["keywords"]]
+                + customer["keywords"]
             )
             # filter positions based on customer keywords
             relevant_positions = filter_positions(all_positions, keywords)
