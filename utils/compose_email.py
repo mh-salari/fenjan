@@ -6,31 +6,29 @@ Created on Des 6 2022
 @email:hue.salari@gmail.com
 """
 
-from urlextract import URLExtract
-from datetime import datetime
-import random
 import os
+import random
+from datetime import datetime
+from urlextract import URLExtract
 
 
 def format_position_summery_text(text):
     extractor = URLExtract()
     formatted_text = ""
-    for line in text.splitlines(True):
-        for word in line.split():
-            url = extractor.find_urls(word)
-            if word[0] == "#":
-                formatted_text += (
-                    '<span style="color:#68677b">' + word + "</span>" + " "
-                )
-            elif url:
-                formatted_text += " " + (
-                    f'<a href="{url[0]}" rel="noopener" style="text-decoration: underline; color: #8a3b8f;" target="_blank">{url[0]}</a>'
-                    + word.replace(url[0], "")
-                    + " "
-                )
-            else:
-                formatted_text += word + " "
-        formatted_text += "<br>"
+    text = text.replace("\n", " <br> ")
+    words = text.split()
+
+    for word in words:
+        url = extractor.find_urls(word)
+        if word[0] == "#":
+            formatted_text += '<span style="color:#68677b">' + word + "</span>" + " "
+        elif url:
+            formatted_text += " "
+            formatted_text += f'<a href="{url[0]}" rel="noopener" style="text-decoration: underline; color: #8a3b8f;" target="_blank">{url[0]}</a>'
+            formatted_text += word.replace(url[0], "")
+            formatted_text += " "
+        else:
+            formatted_text += word + " "
 
     return formatted_text
 
@@ -63,7 +61,7 @@ def compose_email(customers_name, positions_source, positions, base_path):
     email_template = email_template.replace("&title_place_holder", title_text)
 
     today = datetime.today().strftime("%B %d, %Y")
-    greeting_text = f"""Dear {customers_name},<br> 
+    greeting_text = f"""Dear {customers_name},<br>
     I am pleased to present to you a list of Ph.D. positions that have been advertised on {positions_source} in the past 24 hours.<br><br>
     {today}"""
     email_template = email_template.replace("&greeting_place_holder", greeting_text)
@@ -112,5 +110,7 @@ if __name__ == "__main__":
     email_template = email_template = compose_email(
         customers_name, positions_source, positions, base_path
     )
-    with open("utils/test.html", "w") as f:
+    out_path = "utils/test.html"
+    print(f"[info]: html file saved in {out_path}")
+    with open(out_path, "w") as f:
         f.write(email_template)
