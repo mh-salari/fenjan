@@ -52,7 +52,7 @@ def make_driver():
 
     # Set options for Chrome
     options = Options()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("user-data-dir=.chrome_driver_session")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -149,6 +149,12 @@ def extract_positions_text(page_source):
 def find_positions(driver, phd_keywords):
     # Set to store all positions found
     all_positions = set()
+
+    # Go to a black page to avoid a bog that scrap the timeline
+    url = "https://www.linkedin.com/search/results/"
+    driver.get(url)
+    time.sleep(5)
+
     # Initialize progress bar
     pbar = tqdm(phd_keywords)
     # Iterate through keywords
@@ -169,8 +175,6 @@ def find_positions(driver, phd_keywords):
         driver.get(url)
         # Extract positions from page source
         positions = extract_positions_text(driver.page_source)
-        # Number of positions found on current page
-        len_founded_positions = len(positions)
         # Iterate through pages
         while True:
             # Increment page number
@@ -209,9 +213,12 @@ def find_positions(driver, phd_keywords):
             "",
             position,
         ).strip()
-        # If position without URL is in the list, remove it
-        if result in all_positions:
-            all_positions.remove(result)
+        # If position with URL and the same position without URLis in the list, remove the one without URL
+        if result != position:
+            try:
+                all_positions.remove(result)
+            except:
+                pass
     # Return list of positions
     return all_positions
 
@@ -261,7 +268,7 @@ def main():
     print("[info]: Logging in to LinkedIn 🐢...")
     login_to_linkedin(driver)
     print("[info]: Searching for Ph.D. positions on LinkedIn 🐷...")
-    all_positions = find_positions(driver, phd_keywords[:])
+    all_positions = find_positions(driver, phd_keywords[:2])
     driver.quit()
     print(f"[info]: Total number of positions: {len(all_positions)}")
     log.info(f"Found {len(all_positions)} posts related to Ph.D. Positions")
