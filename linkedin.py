@@ -5,7 +5,7 @@ Created on Des 6 2022
 @author: Hue (MohammadHossein) Salari
 @email:hue.salari@gmail.com
 
-Sources: 
+Sources:
     - https://www.geeksforgeeks.org/scrape-linkedin-using-selenium-and-beautiful-soup-in-python/
     - https://stackoverflow.com/questions/64717302/deprecationwarning-executable-path-has-been-deprecated-selenium-python
     - https://stackoverflow.com/questions/32391303/how-to-scroll-to-the-end-of-the-page-using-selenium-in-python
@@ -65,9 +65,52 @@ def login_to_linkedin(driver):
     driver.find_element("xpath", "//button[@type='submit']").click()
 
 
-def find_positions(driver, phd_keywords):
+def extract_positions_text(page_source):
+
     _positions = []
     positions = []
+
+    soup = BeautifulSoup(page_source.replace("<br>", "\n"), "lxml")
+
+    search_results = soup.find("main", {"aria-label": "Search results"})
+
+    _positions += search_results.find_all(
+        "div",
+        {"class": "update-components-text relative feed-shared-update-v2__commentary"},
+    )
+    positions += [position.text.strip() for position in _positions]
+
+    links_p1 = search_results.find_all(
+        "div",
+        {
+            "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative feed-shared-update-v2--e2e artdeco-card"
+        },
+    )
+
+    links_p2 = search_results.find_all(
+        "div",
+        {
+            "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative artdeco-card"
+        },
+    )
+    for links in links_p1 + links_p2:
+        try:
+            position_text = links.find(
+                "div",
+                {
+                    "class": "update-components-text relative feed-shared-update-v2__commentary"
+                },
+            ).text.strip()
+            if position_text:
+                positions[
+                    positions.index(position_text)
+                ] = f'{position_text}\nhttps://www.linkedin.com/feed/update/{links["data-urn"]}'
+        except:
+            pass
+    return list(set(positions))
+
+
+def find_positions(driver, phd_keywords):
 
     url = "https://www.linkedin.com/search/results/"
     driver.get(url)
@@ -75,53 +118,18 @@ def find_positions(driver, phd_keywords):
     for keyword in tqdm(phd_keywords):
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         driver.get(url)
-        time.sleep(30)
-        for _ in tqdm(range(10), leave=False):
+        positions = extract_positions_text(driver.page_source)
+        len_founded_positions = len(positions)
+        scroll_flag = True
+        while scroll_flag:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(10)
-
-        src = driver.page_source
-        soup = BeautifulSoup(src, "lxml")
-
-        search_results = soup.find("main", {"aria-label": "Search results"})
-
-        _positions += search_results.find_all(
-            "div",
-            {
-                "class": "update-components-text relative feed-shared-update-v2__commentary"
-            },
-        )
-        positions += [position.text.strip() for position in _positions]
-
-        links_p1 = search_results.find_all(
-            "div",
-            {
-                "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative feed-shared-update-v2--e2e artdeco-card"
-            },
-        )
-
-        links_p2 = search_results.find_all(
-            "div",
-            {
-                "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative artdeco-card"
-            },
-        )
-        for links in links_p1 + links_p2:
-            try:
-                position_text = links.find(
-                    "div",
-                    {
-                        "class": "update-components-text relative feed-shared-update-v2__commentary"
-                    },
-                ).text.strip()
-                if position_text:
-                    positions[
-                        positions.index(position_text)
-                    ] = f'{position_text}\nhttps://www.linkedin.com/feed/update/{links["data-urn"]}'
-            except:
-                pass
-
-    positions = list(set(positions))
+            positions += extract_positions_text(driver.page_source)
+            positions = list(set(positions))
+            if len(positions) != len_founded_positions:
+                len_founded_positions = len(positions)
+            else:
+                scroll_flag = False
 
     for position in positions:
         result = re.sub(
@@ -134,7 +142,6 @@ def find_positions(driver, phd_keywords):
                 positions.remove(result)
             except:
                 pass
-
     return positions
 
 
@@ -149,7 +156,6 @@ def filter_positions(positions, keywords):
 def compose_and_send_email(email_address, customers_name, positions, base_path):
 
     email_text = compose_email(customers_name, "LinkedIn", positions, base_path)
-
     send_email(email_address, "PhD Positions from LinkedIn", email_text, "html")
 
 
@@ -159,14 +165,14 @@ if __name__ == "__main__":
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
 
     load_dotenv()
-    print("Opening Chrome")
+    print("[info]: Opening Chrome")
     driver = make_driver()
-    print("Logging in to the Linkedin")
+    print("[info]: Logging in to the Linkedin")
     login_to_linkedin(driver)
-    print("Searching for the fully funded Ph.D. positions in Linkedin 🐷")
+    print("[info]: Searching for the fully funded Ph.D. positions in Linkedin 🐷")
     positions = find_positions(driver, phd_keywords[:])
     driver.quit()
-    print(f"Total number of positions: {len(positions)}")
+    print(f"[info]: Total number of positions: {len(positions)}")
     log.info(f"Found {len(positions)} posts related to Ph.D. Positions")
     today = datetime.today()
     date = today - timedelta(days=1)
@@ -183,7 +189,7 @@ if __name__ == "__main__":
                 log.info(
                     f"Sending email containing {len(related_positions)} positions to: {customer['name']}"
                 )
-                print(f"sending email to: {customer['name']}")
+                print(f"[info]: sending email to: {customer['name']}")
                 compose_and_send_email(
                     customer["email"], customer["name"], related_positions, base_path
                 )
