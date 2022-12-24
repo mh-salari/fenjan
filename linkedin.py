@@ -268,7 +268,7 @@ def main():
     print("[info]: Logging in to LinkedIn 🐢...")
     login_to_linkedin(driver)
     print("[info]: Searching for Ph.D. positions on LinkedIn 🐷...")
-    all_positions = find_positions(driver, phd_keywords[:2])
+    all_positions = find_positions(driver, phd_keywords[:])
     driver.quit()
     print(f"[info]: Total number of positions: {len(all_positions)}")
     log.info(f"Found {len(all_positions)} posts related to Ph.D. Positions")
