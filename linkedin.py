@@ -41,7 +41,7 @@ log.basicConfig(
 
 def make_driver():
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("user-data-dir=~/.chrome_driver_session")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
