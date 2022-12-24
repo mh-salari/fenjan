@@ -13,12 +13,12 @@ Sources:
 
 
 import os
+import re
 import time
 import logging as log
 from tqdm import tqdm
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-import re
 
 from bs4 import BeautifulSoup
 
@@ -27,10 +27,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from utils.send_email import send_email
-from utils.compose_email import compose_email
 
+from utils.send_email import send_email
 from utils.phd_keywords import phd_keywords
+from utils.compose_email import compose_email
 from utils.customers_data import customers_data
 
 log_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "linkedin.log")
@@ -41,7 +41,8 @@ log.basicConfig(
 
 def make_driver():
     options = Options()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
+    options.add_argument("user-data-dir=~/.chrome_driver_session")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
@@ -53,11 +54,14 @@ def make_driver():
 
 
 def login_to_linkedin(driver):
+
     email = os.environ["LINKEDIN_EMAIL_ADDRESS"]
     password = os.environ["LINKEDIN_PASSWORD"]
 
     driver.get("https://linkedin.com/uas/login")
     time.sleep(5)
+    if driver.current_url == "https://www.linkedin.com/feed/":
+        return
     username = driver.find_element("id", "username")
     username.send_keys(email)
     pword = driver.find_element("id", "password")
@@ -115,23 +119,43 @@ def find_positions(driver, phd_keywords):
     url = "https://www.linkedin.com/search/results/"
     driver.get(url)
     time.sleep(5)
-    for keyword in tqdm(phd_keywords):
+    all_positions = []
+    pbar = tqdm(phd_keywords)
+    for keyword in pbar:
+        page = 0
+        pbar.set_postfix(
+            {
+                "Keyword": keyword,
+                "page": page,
+                "TN of founded positions": len(all_positions),
+            }
+        )
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         driver.get(url)
         positions = extract_positions_text(driver.page_source)
         len_founded_positions = len(positions)
         scroll_flag = True
         while scroll_flag:
+            page += 1
+            pbar.set_postfix(
+                {
+                    "Keyword": keyword,
+                    "page": page,
+                    "TN of founded positions": len(all_positions),
+                }
+            )
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(10)
-            positions += extract_positions_text(driver.page_source)
+            positions = extract_positions_text(driver.page_source)
             positions = list(set(positions))
             if len(positions) != len_founded_positions:
                 len_founded_positions = len(positions)
             else:
                 scroll_flag = False
+        all_positions += positions
 
-    for position in positions:
+    all_positions = list(set(all_positions))
+    for position in all_positions:
         result = re.sub(
             r"https:\/\/www\.linkedin\.com\/feed\/update\/urn:li:activity:\d+",
             "",
@@ -139,10 +163,10 @@ def find_positions(driver, phd_keywords):
         ).strip()
         if result != position:
             try:
-                positions.remove(result)
+                all_positions.remove(result)
             except:
                 pass
-    return positions
+    return all_positions
 
 
 def filter_positions(positions, keywords):
@@ -167,9 +191,9 @@ if __name__ == "__main__":
     load_dotenv()
     print("[info]: Opening Chrome")
     driver = make_driver()
-    print("[info]: Logging in to the Linkedin")
+    print("[info]: Logging in to the Linkedin 🐢...")
     login_to_linkedin(driver)
-    print("[info]: Searching for the fully funded Ph.D. positions in Linkedin 🐷")
+    print("[info]: Searching for the Ph.D. positions in Linkedin 🐷")
     positions = find_positions(driver, phd_keywords[:])
     driver.quit()
     print(f"[info]: Total number of positions: {len(positions)}")
