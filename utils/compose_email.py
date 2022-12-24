@@ -95,21 +95,17 @@ def compose_email(customers_name, positions_source, positions, base_path):
 
 if __name__ == "__main__":
 
-    positions = [
-        "date:2022-12-05 12:16:58\nby:CDT Artificial Intelligence+Music\nBe sure also to check out the list of potential PhD topics: https://t.co/9RcDLP0AUh\nhttps://twitter.com/twitter/statuses/1599739607284736001",
-        "date:2022-12-05 07:34:49\nby:Onderzoeker\n#vacature PhD position: Artificial intelligence in stroke imaging. https://t.co/tLcvDWm4X4\nhttps://twitter.com/twitter/statuses/1599668599416922113",
-        "date:2022-12-06 15:31:59\nby:Chirag Nagpal\n@Maggiemakar @UMichCSE Must mention Mingzhu Liu @MingzhuLiu4 (senior CS Major at UMich CS) is looking for a PhD position in ML for Health .. Mingzhu worked with us this summer and did fantastic work in using Deep Learning for Risk Estimation with Medical Imaging!\nhttps://twitter.com/twitter/statuses/1600151072974073856",
-        "date:2022-12-06 11:51:13\nby:NZZ Jobs\nPhD Position: Project on Artificial Intelligence and People Analytics https://t.co/TsWo2S1bqM\nhttps://twitter.com/twitter/statuses/1600095512203759616",
-        "date:2022-12-06 15:17:55\nby:Harquail School of Earth Sciences\nInterested in #DataAnalytics and #Geoscience? We have a @CFREF_APOGEE PhD opportunity starting in winter 2023 with @LUEngrCompSci - check out the posting &amp; apply now! https://t.co/ojJVWzBQJ3\n#MachineLearning #geospatial #randomforest #mapping #MetalEarth #geology #computerscience\nhttps://twitter.com/twitter/statuses/1600147531970715654",
-        "date:2022-12-05 21:28:24\nby:Kate Allen @ Equibreathe\n\u2066@VetsSGD\u2069 PhD opportunity using machine learning approaches for analysis of equine endoscopy recordings. Bristol Veterinary School.  https://t.co/p7BtzsAY9D\nhttps://twitter.com/twitter/statuses/1599878379716632584",
-    ]
+    import pickle
+
+    with open("utils/test.positions", "rb") as f:
+        positions = pickle.load(f)
     base_path = os.path.dirname(os.path.abspath(__file__))
 
     customers_name = "Hue Salari"
     positions_source = "Twitter"
 
     email_template = email_template = compose_email(
-        customers_name, positions_source, positions, base_path
+        customers_name, positions_source, positions[:20], base_path
     )
     out_path = "utils/test.html"
     print(f"[info]: html file saved in {out_path}")
