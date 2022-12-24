@@ -73,7 +73,7 @@ def clean_tweets(tweets):
         if description not in _positions:
             _positions.append(f"{description}")
             positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}\nby:{tweet.user.name}\n\n{description}\n\n{url}"
+                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{description}<br>gi{url}"
             )
     return positions
 

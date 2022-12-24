@@ -6,6 +6,7 @@ Created on Des 6 2022
 @email:hue.salari@gmail.com
 """
 
+import re
 import os
 import random
 from datetime import datetime
@@ -15,9 +16,9 @@ from urlextract import URLExtract
 def format_position_summery_text(text):
     extractor = URLExtract()
     formatted_text = ""
+    text = re.sub(r"\n+", "\n", text)
     text = text.replace("\n", " <br> ")
     words = text.split()
-
     for word in words:
         url = extractor.find_urls(word)
         if word[0] == "#":
