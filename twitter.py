@@ -179,8 +179,6 @@ def clean_tweets(tweets):
 
     # iterate through tweets
     for tweet in set(tweets):
-        # generate URL for the tweet
-        url = f"https://twitter.com/twitter/statuses/{tweet.id}"
         try:
             # get tweet description from retweeted status if possible
             text = tweet.retweeted_status.full_text
@@ -201,6 +199,8 @@ def clean_tweets(tweets):
                 text = text.replace(url, final_url)
             # add tweet description to the list of seen descriptions
             seen_positions.append(f"{text}")
+            # generate URL for the tweet
+            url = f"https://twitter.com/twitter/statuses/{tweet.id}"
             # format tweet and add it to the list of formatted tweets
             positions.append(
                 f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>Source:{url}"
