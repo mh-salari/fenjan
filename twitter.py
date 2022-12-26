@@ -203,7 +203,7 @@ def clean_tweets(tweets):
             seen_positions.append(f"{text}")
             # format tweet and add it to the list of formatted tweets
             positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}"
+                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>Source:{url}"
             )
             raw_positions.append(tweet)
     return positions, raw_positions
