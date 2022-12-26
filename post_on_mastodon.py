@@ -120,11 +120,12 @@ def main():
         tweets = twitter.find_positions(twitter_api, phd_keywords[:], date)
 
     # Save the id of newest tweet
-    ids = list()
-    for tweet in tweets:
-        ids.append(tweet.id)
-    ids.sort()
-    pickle.dump(ids[-1], open(newest_tweet_id_path, "wb"))
+    if tweets:
+        ids = list()
+        for tweet in tweets:
+            ids.append(tweet.id)
+        ids.sort()
+        pickle.dump(ids[-1], open(newest_tweet_id_path, "wb"))
 
     # Extract postilions test and images from tweets
     positions_text = twitter.clean_tweets(tweets)
