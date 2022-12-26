@@ -1,5 +1,5 @@
 beautifulsoup4==4.11.1
-mastodon==0.0.1
+mastodon
 python-dotenv==0.21.0
 requests==2.28.1
 selenium==4.7.2
