@@ -130,12 +130,17 @@ def main():
         pickle.dump(ids[-1], open(newest_tweet_id_path, "wb"))
 
     # Extract postilions test and images from tweets
-    positions_text = twitter.clean_tweets(tweets)
+    positions_text, raw_positions = twitter.clean_tweets(tweets)
+
     positions_images = [
-        twitter.extract_images_url_in_tweet_status(tweet) for tweet in tweets
+        twitter.extract_images_url_in_tweet_status(tweet) for tweet in raw_positions
     ]
+    assert len(positions_images) == len(
+        positions_text
+    ), "positions_text and positions_images should have same size"
 
     total_num = 0
+
     for text, images_url in zip(positions_text, positions_images):
         if any(item.lower() in text.lower() for item in keywords):
             total_num += 1
