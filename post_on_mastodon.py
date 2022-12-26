@@ -68,7 +68,7 @@ def download_media_and_post_to_mastodon(mastodon_api, text, images_url, temp_pat
     media_ids = []
     if images_url:
         images_filename = []
-        for image_url in tqdm(images_url):
+        for image_url in images_url:
             # Download the image
             try:
                 file_name = wget.download(image_url, out=temp_path)
@@ -110,11 +110,13 @@ def main():
     # otherwise, search seance the id of last tweet
     if os.path.exists(newest_tweet_id_path):
         since_id = pickle.load(open(newest_tweet_id_path, "rb"))
+        print(f"Search since last id {since_id}")
         tweets = twitter.find_positions(twitter_api, phd_keywords[:], since_id=since_id)
     else:
         # Get date from yesterday
-        yesterday = datetime.today() - timedelta(days=7)
-        date = yesterday.strftime("%Y-%m-%d")
+        last_week = datetime.today() - timedelta(days=7)
+        date = last_week.strftime("%Y-%m-%d")
+        print(f"Search since last week {date}")
         tweets = twitter.find_positions(twitter_api, phd_keywords[:], date)
 
     # Save the id of newest tweet
@@ -130,8 +132,10 @@ def main():
         twitter.extract_images_url_in_tweet_status(tweet) for tweet in tweets
     ]
 
+    total_num = 0
     for text, images_url in zip(positions_text, positions_images):
         if any(item.lower() in text.lower() for item in keywords):
+            total_num += 1
             # Format the text of position
             text = text.replace("<br>", "\n")
             text += "\n #PhdPosition"
@@ -139,8 +143,9 @@ def main():
                 mastodon_api, text, images_url, temp_path
             )
 
-    # # Log number of tweets that have been found
-    # log.info(f"Found {len(tweets)} tweets related to Ph.D. Positions")
+        # Log number of posted toots
+    print(f"Total number of toots that posted in this run {total_num}")
+    log.info(f"Total number of toots that posted in this run {total_num}")
 
 
 if __name__ == "__main__":
