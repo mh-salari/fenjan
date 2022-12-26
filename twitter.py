@@ -65,7 +65,40 @@ def connect_to_twitter_api():
     return api
 
 
-def find_positions(twitter_api, phd_keywords, date):
+def extract_images_url_in_tweet_status(tweet):
+    """
+    Extracts image URLs from a tweet object.
+
+    Parameters:
+    tweet (dict): A tweet object from the Twitter API.
+
+    Returns:
+    list: A list of image URLs.
+    """
+    # Check if the tweet has media entities
+    if "media" in tweet.entities:
+        # Extract image URLs from the tweet's media entities
+        urls = [x["media_url"] for x in tweet.entities["media"]]
+
+        # Check if the tweet has extended media entities
+        try:
+            # Extract image URLs from the tweet's extended media entities
+            extra = [x["media_url"] for x in tweet.extended_entities["media"]]
+
+            # Combine the lists of image URLs
+            urls = set(urls + extra)
+        except:
+            # If there are no extended media entities, do nothing
+            pass
+
+        # Return the list of image URLs
+        return urls
+    else:
+        # If there are no media entities, return None
+        return None
+
+
+def find_positions(twitter_api, phd_keywords, date=None, since_id=None):
     """
     Find tweets containing keywords related to  funded PhD positions.
 
@@ -92,12 +125,28 @@ def find_positions(twitter_api, phd_keywords, date):
                 "TN of founded positions": len(tweets),
             }
         )
-        # create query string for searching tweets containing the keyword that posted after the given date
-        query = f'"{keyword}" since:{date} -filter:retweets'
-        # search Twitter for tweets matching the query
-        found_tweets = twitter_api.search_tweets(
-            query, tweet_mode="extended", result_type="recent", lang="en", count=100
-        )
+        # create query string for searching tweets containing the keyword and search Twitter for tweets matching the query
+
+        if since_id:  # posted after the given tweet_id
+            query = f'"{keyword}" -filter:retweets'
+            found_tweets = twitter_api.search_tweets(
+                query,
+                tweet_mode="extended",
+                result_type="recent",
+                lang="en",
+                count=100,
+                since_id=since_id,
+            )
+        elif date:  # posted after the given date
+            query = f'"{keyword}" since:{date} -filter:retweets'
+            found_tweets = twitter_api.search_tweets(
+                query, tweet_mode="extended", result_type="recent", lang="en", count=100
+            )
+        else:
+            query = f'"{keyword}" -filter:retweets'
+            found_tweets = twitter_api.search_tweets(
+                query, tweet_mode="extended", result_type="recent", lang="en", count=100
+            )
         # add found tweets to the list of tweets
         tweets += found_tweets
         tweets = list(set(tweets))
@@ -179,9 +228,7 @@ def compose_and_send_email(recipient_email, recipient_name, positions, base_path
         None
     """
     # generate email text using the email template and the given positions
-    email_text = email_template = compose_email(
-        recipient_name, "Twitter", positions, base_path
-    )
+    email_text = compose_email(recipient_name, "Twitter", positions, base_path)
     # send email with the generated text
     send_email(recipient_email, "PhD Positions from Twitter", email_text, "html")
 
