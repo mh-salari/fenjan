@@ -138,7 +138,7 @@ def main():
             total_num += 1
             # Format the text of position
             text = text.replace("<br>", "\n")
-            text += "\n #PhdPosition"
+            text += "\n#PhdPosition"
             download_media_and_post_to_mastodon(
                 mastodon_api, text, images_url, temp_path
             )
