@@ -193,7 +193,7 @@ def clean_tweets(tweets):
             # format tweet and add it to the list of formatted tweets
             positions.append(
                 f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}".replace(
-                    "&amp", "&"
+                    "&amp;", "&"
                 )
             )
             raw_positions.append(tweet)
