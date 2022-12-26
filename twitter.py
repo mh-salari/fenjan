@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 import tweepy
+import requests
+from urlextract import URLExtract
 
 # import helper functions from other modules
 from utils.send_email import send_email
@@ -185,16 +187,23 @@ def clean_tweets(tweets):
         except AttributeError:
             # get tweet description from original tweet if retweeted status is not available
             text = tweet.full_text
-
         # add tweet if its text has not been seen before
         if text not in seen_positions:
+
+            text = text.replace("&amp;", "&")
+
+            # Replace shortened URLs with distention URL
+            extractor = URLExtract()
+            urls = extractor.find_urls(text)
+            for url in urls:
+                response = requests.get(url, allow_redirects=True)
+                final_url = response.url
+                text = text.replace(url, final_url)
             # add tweet description to the list of seen descriptions
             seen_positions.append(f"{text}")
             # format tweet and add it to the list of formatted tweets
             positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}".replace(
-                    "&amp;", "&"
-                )
+                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}"
             )
             raw_positions.append(tweet)
     return positions, raw_positions
@@ -256,7 +265,7 @@ def main():
     date = yesterday.strftime("%Y-%m-%d")
 
     # Search for Ph.D. positions and clean up tweets
-    phd_positions, _ = clean_tweets(find_positions(twitter_api, phd_keywords, date))
+    phd_positions, _ = clean_tweets(find_positions(twitter_api, phd_keywords[:1], date))
 
     # Log number of tweets that have been found
     log.info(f"Found {len(phd_positions)} tweets related to Ph.D. Positions")
