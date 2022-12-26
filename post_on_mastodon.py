@@ -12,7 +12,9 @@ from mastodon import Mastodon
 from utils.phd_keywords import phd_keywords
 
 # set up logging to a file
-log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "twitter.log")
+log_file_path = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "post_on_mastodon.log"
+)
 log.basicConfig(
     level=log.INFO,
     filename=log_file_path,
