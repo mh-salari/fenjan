@@ -19,6 +19,7 @@ log.basicConfig(
     level=log.INFO,
     filename=log_file_path,
     format="%(asctime)s %(levelname)s %(message)s",
+    force=True,
 )
 
 keywords = [
