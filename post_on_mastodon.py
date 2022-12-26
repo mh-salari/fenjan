@@ -13,14 +13,13 @@ from utils.phd_keywords import phd_keywords
 
 # set up logging to a file
 log_file_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "post_on_mastodon.log"
+    os.path.dirname(os.path.realpath(__file__)), "temp", "post_on_mastodon.log"
 )
 log.basicConfig(
     level=log.INFO,
     filename=log_file_path,
     format="%(asctime)s %(levelname)s %(message)s",
 )
-import requests
 
 keywords = [
     "computer vision",

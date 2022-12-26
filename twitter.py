@@ -25,7 +25,7 @@ from utils.phd_keywords import phd_keywords
 from utils.customers_data import customers_data
 
 # set up logging to a file
-log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "twitter.log")
+log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "temp", "twitter.log")
 log.basicConfig(
     level=log.INFO,
     filename=log_file_path,

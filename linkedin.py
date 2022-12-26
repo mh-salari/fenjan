@@ -35,7 +35,7 @@ from utils.customers_data import customers_data
 
 # Set path for logging
 log_file_path = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "linkedin.log"
+    os.path.dirname(os.path.realpath(__file__)), "temp", "linkedin.log"
 )
 # Configure logging
 log.basicConfig(
