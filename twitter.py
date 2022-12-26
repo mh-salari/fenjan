@@ -25,7 +25,9 @@ from utils.phd_keywords import phd_keywords
 from utils.customers_data import customers_data
 
 # set up logging to a file
-log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "temp", "twitter.log")
+log_file_path = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "temp", "twitter.log"
+)
 log.basicConfig(
     level=log.INFO,
     filename=log_file_path,
@@ -161,11 +163,15 @@ def clean_tweets(tweets):
         tweets (List[tweepy.Status]): List of tweets to filter and format.
 
     Returns:
-        List[str]: List of formatted tweets.
+        positions, raw_positions (List[str], List[tweepy.Status]): List of formatted tweets and raw tweets
     """
 
     # list to store formatted tweets
     positions = []
+
+    # list to store raw tweets
+    raw_positions = []
+
     # list to store previously seen tweet text
     seen_positions = []
 
@@ -186,10 +192,12 @@ def clean_tweets(tweets):
             seen_positions.append(f"{text}")
             # format tweet and add it to the list of formatted tweets
             positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}"
+                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>{url}".replace(
+                    "&amp", "&"
+                )
             )
-
-    return positions
+            raw_positions.append(tweet)
+    return positions, raw_positions
 
 
 def filter_positions(positions, keywords):
@@ -248,7 +256,7 @@ def main():
     date = yesterday.strftime("%Y-%m-%d")
 
     # Search for Ph.D. positions and clean up tweets
-    phd_positions = clean_tweets(find_positions(twitter_api, phd_keywords, date))
+    phd_positions, _ = clean_tweets(find_positions(twitter_api, phd_keywords, date))
 
     # Log number of tweets that have been found
     log.info(f"Found {len(phd_positions)} tweets related to Ph.D. Positions")
