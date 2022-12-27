@@ -179,28 +179,33 @@ def clean_tweets(tweets):
 
     # iterate through tweets
     for tweet in set(tweets):
+        url = ""
+        urls = []
         try:
             # get tweet description from retweeted status if possible
             text = tweet.retweeted_status.full_text
         except AttributeError:
             # get tweet description from original tweet if retweeted status is not available
             text = tweet.full_text
-        # add tweet if its text has not been seen before
+        # format tweet if its text has not been seen before
         if text not in seen_positions:
+            # add tweet description to the list of seen descriptions
+            seen_positions.append(f"{text}")
 
+            # fix &amp; problem
             text = text.replace("&amp;", "&")
 
             # Replace shortened URLs with distention URL
             extractor = URLExtract()
             urls = extractor.find_urls(text)
-            for url in urls:
-                response = requests.get(url, allow_redirects=True)
+            for _url in urls:
+                response = requests.get(_url, allow_redirects=True)
                 final_url = response.url
-                text = text.replace(url, final_url)
-            # add tweet description to the list of seen descriptions
-            seen_positions.append(f"{text}")
+                text = text.replace(_url, final_url)
+
             # generate URL for the tweet
             url = f"https://twitter.com/twitter/statuses/{tweet.id}"
+
             # format tweet and add it to the list of formatted tweets
             positions.append(
                 f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>Source:{url}"
