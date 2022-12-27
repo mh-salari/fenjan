@@ -210,7 +210,7 @@ def clean_tweets(tweets):
             formatted_tweet = f"date: {tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
             formatted_tweet += f"<br>by: {tweet.user.name}"
             formatted_tweet += f"<br><br>{text}"
-            formatted_tweet += f"<br><br>Source🦖:<br>{url}"
+            formatted_tweet += f"<br><br>🐦🔗:<br>{url}"
             positions.append(formatted_tweet)
 
             # Add the tweet to the list of raw tweets
