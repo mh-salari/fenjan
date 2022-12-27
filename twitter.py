@@ -207,9 +207,13 @@ def clean_tweets(tweets):
             url = f"https://twitter.com/twitter/statuses/{tweet.id}"
 
             # format tweet and add it to the list of formatted tweets
-            positions.append(
-                f"date:{tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}<br>by:{tweet.user.name}<br><br>{text}<br>Source:{url}"
-            )
+            formatted_tweet = f"date: {tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            formatted_tweet += f"<br>by: {tweet.user.name}"
+            formatted_tweet += f"<br><br>{text}"
+            formatted_tweet += f"<br><br>Source🦖:<br>{url}"
+            positions.append(formatted_tweet)
+
+            # Add the tweet to the list of raw tweets
             raw_positions.append(tweet)
     return positions, raw_positions
 
