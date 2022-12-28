@@ -217,9 +217,7 @@ def clean_tweets(tweets):
                 f"<br><br>🐦🔗: https://twitter.com/twitter/statuses/{tweet.id}"
             )
             positions.append(formatted_tweet)
-            print(formatted_tweet)
-            print("-" * 50)
-            print("\n")
+
             # Add the tweet to the list of raw tweets
             raw_positions.append(tweet)
     return positions, raw_positions
