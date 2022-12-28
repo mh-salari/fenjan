@@ -277,7 +277,7 @@ def main():
     date = yesterday.strftime("%Y-%m-%d")
 
     # Search for Ph.D. positions and clean up tweets
-    phd_positions, _ = clean_tweets(find_positions(twitter_api, phd_keywords[:1], date))
+    phd_positions, _ = clean_tweets(find_positions(twitter_api, phd_keywords[:], date))
 
     # Log number of tweets that have been found
     log.info(f"Found {len(phd_positions)} tweets related to Ph.D. Positions")
