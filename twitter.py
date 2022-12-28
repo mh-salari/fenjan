@@ -178,6 +178,7 @@ def clean_tweets(tweets):
     seen_positions = []
 
     # iterate through tweets
+    print("Cleaning and formatting the text of Tweets 🪺...")
     for tweet in tqdm(set(tweets)):
         url = ""
         urls = []
@@ -200,7 +201,7 @@ def clean_tweets(tweets):
             urls = extractor.find_urls(text)
             for _url in urls:
                 try:
-                    response = requests.get(_url, allow_redirects=True)
+                    response = requests.get(_url, allow_redirects=True, timeout=3)
                     final_url = response.url
                     text = text.replace(_url, final_url)
                 except:
