@@ -180,8 +180,6 @@ def clean_tweets(tweets):
     # iterate through tweets
     print("Cleaning and formatting the text of Tweets 🪺...")
     for tweet in tqdm(set(tweets)):
-        url = ""
-        urls = []
         try:
             # get tweet description from retweeted status if possible
             text = tweet.retweeted_status.full_text
@@ -191,7 +189,7 @@ def clean_tweets(tweets):
         # format tweet if its text has not been seen before
         if text not in seen_positions:
             # add tweet description to the list of seen descriptions
-            seen_positions.append(f"{text}")
+            seen_positions.append(text)
 
             # fix &amp; problem
             text = text.replace("&amp;", "&")
@@ -199,22 +197,21 @@ def clean_tweets(tweets):
             # Replace shortened URLs with distention URL
             extractor = URLExtract()
             urls = extractor.find_urls(text)
-            for _url in urls:
+            for url in urls:
                 try:
-                    response = requests.get(_url, allow_redirects=True, timeout=3)
+                    response = requests.get(url, allow_redirects=True, timeout=3)
                     final_url = response.url
-                    text = text.replace(_url, final_url)
+                    text = text.replace(url, final_url)
                 except:
                     pass
-
-            # generate URL for the tweet
-            url = f"https://twitter.com/twitter/statuses/{tweet.id}"
 
             # format tweet and add it to the list of formatted tweets
             formatted_tweet = f"date: {tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
             formatted_tweet += f"<br>by: {tweet.user.name}"
             formatted_tweet += f"<br><br>{text}"
-            formatted_tweet += f"<br><br>🐦🔗:<br>{url}"
+            formatted_tweet += (
+                f"<br><br>🐦🔗: https://twitter.com/twitter/statuses/{tweet.id}"
+            )
             positions.append(formatted_tweet)
 
             # Add the tweet to the list of raw tweets
