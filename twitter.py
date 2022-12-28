@@ -199,9 +199,12 @@ def clean_tweets(tweets):
             extractor = URLExtract()
             urls = extractor.find_urls(text)
             for _url in urls:
-                response = requests.get(_url, allow_redirects=True)
-                final_url = response.url
-                text = text.replace(_url, final_url)
+                try:
+                    response = requests.get(_url, allow_redirects=True)
+                    final_url = response.url
+                    text = text.replace(_url, final_url)
+                except:
+                    pass
 
             # generate URL for the tweet
             url = f"https://twitter.com/twitter/statuses/{tweet.id}"
