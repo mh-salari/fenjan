@@ -121,6 +121,9 @@ def main():
         print(f"Search since last week {date}")
         tweets = twitter.find_positions(twitter_api, phd_keywords[:], date)
 
+    # Log the total number of tweets that we have found in this run
+    log.info(f"Total number of founded tweets: {len(tweets)}")
+
     # Save the id of newest tweet
     if tweets:
         ids = list()
@@ -151,7 +154,7 @@ def main():
                 mastodon_api, text, images_url, temp_path
             )
 
-        # Log number of posted toots
+    # Log number of posted toots
     print(f"Total number of toots that posted in this run {total_num}")
     log.info(f"Total number of toots that posted in this run {total_num}")
 
