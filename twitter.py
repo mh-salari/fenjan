@@ -36,9 +36,9 @@ log.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
 )
 
-
-import tweepy
-import os
+# Change the default number of retires for request get
+retries = 0
+requests.adapters.DEFAULT_RETRIES = retries
 
 
 def connect_to_twitter_api():
@@ -178,7 +178,7 @@ def clean_tweets(tweets):
     seen_positions = []
 
     # iterate through tweets
-    for tweet in set(tweets):
+    for tweet in tqdm(set(tweets)):
         url = ""
         urls = []
         try:
