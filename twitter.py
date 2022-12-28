@@ -201,7 +201,11 @@ def clean_tweets(tweets):
                 try:
                     response = requests.get(url, allow_redirects=True, timeout=3)
                     final_url = response.url
-                    text = text.replace(url, final_url)
+                    # Remove links to twitter post photos
+                    if "/photo/" in final_url:
+                        text = text.replace(url, "")
+                    else:
+                        text = text.replace(url, final_url)
                 except:
                     pass
 
@@ -213,7 +217,9 @@ def clean_tweets(tweets):
                 f"<br><br>🐦🔗: https://twitter.com/twitter/statuses/{tweet.id}"
             )
             positions.append(formatted_tweet)
-
+            print(formatted_tweet)
+            print("-" * 50)
+            print("\n")
             # Add the tweet to the list of raw tweets
             raw_positions.append(tweet)
     return positions, raw_positions
