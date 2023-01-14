@@ -105,43 +105,22 @@ def extract_positions_text(page_source):
         "div",
         {"class": "update-components-text relative feed-shared-update-v2__commentary"},
     )
-    # Find all links elements
-    link_elements = search_results.find_all(
-        "div",
-        {
-            "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative feed-shared-update-v2--e2e artdeco-card"
-        },
-    )
-    link_elements += search_results.find_all(
-        "div",
-        {
-            "class": "feed-shared-update-v2 feed-shared-update-v2--minimal-padding full-height relative artdeco-card"
-        },
-    )
     # Add position text to positions set
     for position_element in position_elements:
         position_text = position_element.text.strip()
+        # extract links from the text
+        links = position_element.find_all("a")
+        for link in links:
+            if "hashtag" not in link["href"]:
+                position_text = position_text.replace(
+                    link.text, f" &link{link['href']}*{link.text.replace(' ', '%20')} "
+                )
+        search_text = "%20".join(position_text.split()[:10]).replace("#", "%23")
+        search_url = f"https://www.linkedin.com/search/results/content/?keywords=%22{search_text}%22&origin=GLOBAL_SEARCH_HEADER&sid=L.U&sortBy=%22date_posted%22"
+        position_text += f"<br><br>🔎🔗: {search_url}"
         if position_text:
             positions.add(position_text)
-    # Add position text and links to positions set
-    for link_element in link_elements:
-        try:
-            # Find position text element
-            position_element = link_element.find(
-                "div",
-                {
-                    "class": "update-components-text relative feed-shared-update-v2__commentary"
-                },
-            )
-            position_text = position_element.text.strip()
-            if position_text:
-                # Add position text and link to positions set
-                positions.add(
-                    f'{position_text}\nhttps://www.linkedin.com/feed/update/{link_element["data-urn"]}'
-                )
-        except:
-            # Ignore errors
-            pass
+
     # Return positions as list
     return list(positions)
 

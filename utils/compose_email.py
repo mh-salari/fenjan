@@ -23,6 +23,13 @@ def format_position_summery_text(text):
         url = extractor.find_urls(word)
         if word[0] == "#":
             formatted_text += '<span style="color:#68677b">' + word + "</span>" + " "
+        elif "&link" in word:
+            link = word[word.find("&link") : word.find("*")].replace("&link", "")
+            text = word[word.find("*") + 1 :].replace("%20", " ")
+            formatted_text += " "
+            formatted_text += f'<a href="{link}" rel="noopener" style="text-decoration: underline; color: #8a3b8f;" target="_blank">{text}</a>'
+            formatted_text += " "
+            formatted_text.replace(word, "")
         elif url:
             formatted_text += " "
             formatted_text += f'<a href="{url[0]}" rel="noopener" style="text-decoration: underline; color: #8a3b8f;" target="_blank">{url[0]}</a>'

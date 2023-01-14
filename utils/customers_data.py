@@ -11,7 +11,7 @@ customers_data = [
     {
         "name": "Hue Salari",
         "email": "hue.salari@gmail.com",
-        "expiration_date": datetime(2023, 1, 6),
+        "expiration_date": datetime(2024, 1, 1),
         "keywords": [
             "computer vision",
             "deep learning",
@@ -28,28 +28,6 @@ customers_data = [
             "weakly-supervised learning",
             "#AI",
             "#ML",
-        ],
-    },
-    {
-        "name": "Ehsan Asheghian Amiri",
-        "email": "ehsan.asheghian@gmail.com",
-        "expiration_date": datetime(2022, 12, 5),
-        "keywords": [
-            "Concrete",
-            "Lca",
-            "life cycle assessment",
-            "Life cycle analysis",
-            "Sustainability",
-            "Sustainable",
-            "BIM",
-            "Building",
-            "Cementitious material",
-            "Recycled Aggregate",
-            "Zero energy",
-            "Low_carbon",
-            "Bio energy",
-            "Climate",
-            "Digital twin",
         ],
     },
 ]
