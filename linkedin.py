@@ -108,14 +108,16 @@ def extract_positions_text(page_source):
     # Add position text to positions set
     for position_element in position_elements:
         position_text = position_element.text.strip()
-        # extract links from the text
+        # Make the search query text
+        search_text = "%20".join(position_text.split()[:10]).replace("#", "%23")
+        # Extract links from the text
         links = position_element.find_all("a")
         for link in links:
             if "hashtag" not in link["href"]:
                 position_text = position_text.replace(
                     link.text, f" &link{link['href']}*{link.text.replace(' ', '%20')} "
                 )
-        search_text = "%20".join(position_text.split()[:10]).replace("#", "%23")
+        # Add the Search link at the end of the position text
         search_url = f"https://www.linkedin.com/search/results/content/?keywords=%22{search_text}%22&origin=GLOBAL_SEARCH_HEADER&sid=L.U&sortBy=%22date_posted%22"
         position_text += f"<br><br>🔎🔗: {search_url}"
         if position_text:
