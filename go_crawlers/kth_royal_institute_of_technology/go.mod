@@ -1,6 +1,13 @@
-module fenjan.ai-hue.ir/kth
+module fenjan.ai-hue.ir/kth_royal_institute_of_technology
+
+replace fenjan.ai-hue.ir/tea => ../tea
 
 go 1.18
+
+require (
+	fenjan.ai-hue.ir/tea v0.0.0-00010101000000-000000000000
+	github.com/gocolly/colly v1.2.0
+)
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
@@ -10,7 +17,6 @@ require (
 	github.com/antchfx/xpath v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly v1.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect

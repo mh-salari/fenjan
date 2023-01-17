@@ -4,23 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql"
+	"fenjan.ai-hue.ir/tea"
 	"github.com/gocolly/colly"
-	"github.com/joho/godotenv"
 )
 
-type Position struct {
-	Title       string `json:"title"`
-	URL         string `json:"url"`
-	Description string `json:"description"`
-	Date        string `json:"date"`
-}
+type Position = tea.Position
 
-// extractPositionDetails function uses colly to scrape a position page and finds the title and text of the position
-func extractPositionDetails(url string) string {
+// extractPositionDescription function uses colly to scrape a position page and finds the title and text of the position
+func extractPositionDescription(url string) string {
 	// Create a new collector
 	c := colly.NewCollector()
 	var description string
@@ -83,95 +76,27 @@ func getPositions(visitedUrls map[string]bool) []Position {
 	return positions
 }
 
-// getDbConnectionString function reads the database connection details from environment variables
-func getDbConnectionString() string {
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	username := os.Getenv("DB_USERNAME")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	return username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname
-}
-
-// createTableIfNotExists function creates the "kth_se" table if it doesn't already exist
-func createTableIfNotExists(db *sql.DB) {
-	// SQL statement to create the table
-	query := `CREATE TABLE IF NOT EXISTS kth_se (
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		title VARCHAR(255) NOT NULL,
-		url VARCHAR(255) NOT NULL,
-		description TEXT NOT NULL,
-		date VARCHAR(255) NOT NULL
-	)`
-
-	// Execute the SQL statement
-	_, err := db.Exec(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// savePositionsToDB function saves the scraped positions to a MySQL database
-func savePositionsToDB(db *sql.DB, positions []Position) {
-	// Prepare the SQL statement
-	stmt, err := db.Prepare("INSERT INTO kth_se (title, url, description, date) VALUES (?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// Loop through each position and execute the SQL statement
-	for _, position := range positions {
-		_, err := stmt.Exec(position.Title, position.URL, position.Description, position.Date)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
-// getUrlsFromDB function return a map of all urls in the "positions" table
-func getUrlsFromDB(db *sql.DB) map[string]bool {
-	// SELECT statement to retrieve URLs from the table
-	rows, err := db.Query("SELECT url FROM kth_se")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	// Create a map to store the URLs
-	urls := make(map[string]bool)
-	for rows.Next() {
-		var url string
-		if err := rows.Scan(&url); err != nil {
-			log.Fatal(err)
-		}
-		urls[url] = true
-	}
-	return urls
-}
-
 func main() {
-	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+
+	// Define table name for  KTH Royal Institute of Technology positions
+	tableName := "kth_se"
 
 	log.Println("Connecting to the 'fenjan' database 🐰.")
-	db, err := sql.Open("mysql", getDbConnectionString())
+	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("Creating the 'kth_se' table in the 'fenjan' database if not exists 👾.")
-	createTableIfNotExists(db)
+	log.Println("Creating the " + tableName + " table in the 'fenjan' database if not exists 👾.")
+	tea.CreateTableIfNotExists(db, tableName)
 
 	// Get the URLs from the database
-	visitedUrls := getUrlsFromDB(db)
+	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
 	log.Println("Searching the KTH Royal Institute of Technology  for the Ph.D. vacancies 🦉.")
 	positions := getPositions(visitedUrls)
 	newPositions := []Position{}
+
 	// Loop through each URL and get the title and text of each position
 	for _, position := range positions[:] {
 		// Check if the URL has been visited before
@@ -179,15 +104,16 @@ func main() {
 			log.Println("URL has been visited before:", position.URL)
 			continue
 		}
-		description := extractPositionDetails(position.URL)
 
+		// Extract description of new positions and add them to a new slice
+		description := extractPositionDescription(position.URL)
 		newPositions = append(newPositions, Position{position.Title, position.URL, description, position.Date})
 	}
 
-	log.Println("Extracted details of", len(positions), "open positions 🤓.")
+	log.Println("Extracted description of", len(newPositions), "open positions 🤓.")
 
 	log.Println("Saving new positions to the database 🚀...")
-	savePositionsToDB(db, newPositions)
+	tea.SavePositionsToDB(db, newPositions, tableName)
 
 	log.Println("Finished 🫡!")
 
