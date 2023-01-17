@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"fenjan.ai-hue.ir/tea"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type Position = tea.Position
