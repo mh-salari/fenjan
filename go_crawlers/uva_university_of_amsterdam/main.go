@@ -1,146 +1,20 @@
-// package main
-
-// import (
-// 	"database/sql"
-// 	"fmt"
-// 	"log"
-// 	"os"
-// 	"strings"
-
-// 	_ "github.com/go-sql-driver/mysql"
-// 	"github.com/gocolly/colly"
-// 	"github.com/joho/godotenv"
-// )
-
-// // extractPositionDetails function uses colly to scrape a position page and finds the title and text of the position
-// func extractPositionDetails(url string) string {
-// 	// Create a new collector
-// 	c := colly.NewCollector()
-// 	var description string
-// 	c.OnHTML("div.content-wrap", func(e *colly.HTMLElement) {
-// 		description = e.Text
-
-// 		junkText := `$(document).ready(function() {
-//             function initializeAddThis() {
-//                 $.getScript('//s7.addthis.com/js/300/addthis_widget.js#pubid=mynetwork', function() {
-//                     addthis_config = {
-//                         username: 'mynetwork',
-//                         ui_language  : 'en'
-//                     }
-//                     var addthis_share = {
-//                         url_transforms : {
-//                             add: {
-//                                 referring_service:
-//                                 '{{code}}'
-//                                                                             }
-//                         }
-//                     }
-//                 });
-//             }
-
-//                             document.addEventListener('cookieConsent', function(event) {
-//                     if (event.detail.cookieClassification.includes('Marketing')) {
-//                         initializeAddThis();
-//                     }
-//                 });
-//                     });
-// `
-// 		description = strings.Replace(description, junkText, "", -1)
-// 	})
-// 	// Add the OnRequest function to log the URLs that are visited
-// 	c.OnRequest(func(r *colly.Request) {
-// 		log.Println("Visiting", r.URL)
-// 	})
-// 	c.Visit(url)
-// 	return description
-// }
-
-// func getPositions(visitedUrls map[string]bool) []Position {
-
-// 	c := colly.NewCollector()
-// 	positions := []Position{}
-// 	// Find and visit all links
-// 	c.OnHTML("tr", func(e *colly.HTMLElement) {
-// 		title := e.ChildText("a")
-// 		url := e.ChildAttr("a", "href")
-// 		date := e.ChildText("td:last-child")
-// 		if url != "" {
-// 			positions = append(positions, Position{title, url, "", date})
-// 		}
-// 	})
-
-// 	c.OnRequest(func(r *colly.Request) {
-// 		fmt.Println("Visiting", r.URL)
-// 	})
-// 	c.Visit("https://www.kth.se/en/om/work-at-kth/doktorander-1.572201")
-// 	return positions
-// }
-
-// func main() {
-// 	// Load environment variables from .env file
-// 	err := godotenv.Load()
-// 	if err != nil {
-// 		log.Fatal("Error loading .env file")
-// 	}
-
-// 	log.Println("Connecting to the 'fenjan' database 🐰.")
-// 	db, err := sql.Open("mysql", getDbConnectionString())
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	log.Println("Creating the 'uva_nl' table in the 'fenjan' database if not exists 👾.")
-// 	createTableIfNotExists(db)
-
-// 	// Get the URLs from the database
-// 	visitedUrls := getUrlsFromDB(db)
-
-// 	log.Println("Searching the KTH Royal Institute of Technology  for the Ph.D. vacancies 🦉.")
-// 	positions := getPositions(visitedUrls)
-// 	newPositions := []Position{}
-// 	// Loop through each URL and get the title and text of each position
-// 	for _, position := range positions[:] {
-// 		// Check if the URL has been visited before
-// 		if visitedUrls[position.URL] {
-// 			log.Println("URL has been visited before:", position.URL)
-// 			continue
-// 		}
-// 		description := extractPositionDetails(position.URL)
-
-// 		newPositions = append(newPositions, Position{position.Title, position.URL, description, position.Date})
-// 	}
-
-// 	log.Println("Extracted details of", len(positions), "open positions 🤓.")
-
-// 	log.Println("Saving new positions to the database 🚀...")
-// 	savePositionsToDB(db, newPositions)
-
-// 	log.Println("Finished 🫡!")
-
-// }
-
 package main
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
-	"github.com/joho/godotenv"
+
+	"fenjan.ai-hue.ir/tea"
 )
 
-type Position struct {
-	Title       string `json:"title"`
-	URL         string `json:"url"`
-	Description string `json:"description"`
-	Date        string `json:"date"`
-}
+type Position = tea.Position
 
 // https://play.golang.org/p/Qg_uv_inCek
 // contains checks if a string is present in a slice
@@ -154,73 +28,7 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-// getDbConnectionString function reads the database connection details from environment variables
-func getDbConnectionString() string {
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	username := os.Getenv("DB_USERNAME")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	return username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname
-}
-
-// createTableIfNotExists function creates the "uva_nl" table if it doesn't already exist
-func createTableIfNotExists(db *sql.DB) {
-	// SQL statement to create the table
-	query := `CREATE TABLE IF NOT EXISTS uva_nl (
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		title VARCHAR(255) NOT NULL,
-		url VARCHAR(255) NOT NULL,
-		description TEXT NOT NULL,
-		date VARCHAR(255) NOT NULL
-	)`
-
-	// Execute the SQL statement
-	_, err := db.Exec(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// savePositionsToDB function saves the scraped positions to a MySQL database
-func savePositionsToDB(db *sql.DB, positions []Position) {
-	// Prepare the SQL statement
-	stmt, err := db.Prepare("INSERT INTO uva_nl (title, url, description, date) VALUES (?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// Loop through each position and execute the SQL statement
-	for _, position := range positions {
-		_, err := stmt.Exec(position.Title, position.URL, position.Description, position.Date)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
-// getUrlsFromDB function return a map of all urls in the "positions" table
-func getUrlsFromDB(db *sql.DB) map[string]bool {
-	// SELECT statement to retrieve URLs from the table
-	rows, err := db.Query("SELECT url FROM uva_nl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	// Create a map to store the URLs
-	urls := make(map[string]bool)
-	for rows.Next() {
-		var url string
-		if err := rows.Scan(&url); err != nil {
-			log.Fatal(err)
-		}
-		urls[url] = true
-	}
-	return urls
-}
-
+// Find total number of active position current;y advertised on UvA University of Amsterdam
 func findNumActivePositions() int {
 	c := colly.NewCollector(
 		colly.AllowedDomains("vacatures.uva.nl"),
@@ -228,7 +36,6 @@ func findNumActivePositions() int {
 
 	var numPositions int
 	c.OnHTML("span#tile-search-results-label", func(e *colly.HTMLElement) {
-
 		re := regexp.MustCompile(`\d+`)
 		results := re.FindAllString(e.Text, -1)
 		numPositions, _ = strconv.Atoi(results[len(results)-1])
@@ -241,11 +48,16 @@ func findNumActivePositions() int {
 	return numPositions
 }
 
+// Get url pf positions advertised
 func getPositionsURL(numPositions int) []string {
 	var positionsURL []string
 	for startRow := 0; startRow < numPositions; startRow += 10 {
 		url := fmt.Sprintf("https://vacatures.uva.nl/UvA/tile-search-results/?q=phd&startrow=%d", startRow)
 		c := colly.NewCollector()
+
+		// Set request timeout timer
+		c.SetRequestTimeout(60 * 5 * time.Second)
+
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 			href := "https://vacatures.uva.nl" + e.Attr("href")
 
@@ -253,19 +65,31 @@ func getPositionsURL(numPositions int) []string {
 				positionsURL = append(positionsURL, href)
 			}
 		})
+
+		// Add the OnRequest function to log the URLs that are visited
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println("Visiting", r.URL)
 		})
+		// Set error handler
+		c.OnError(func(r *colly.Response, err error) {
+			log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		})
+
 		c.Visit(url)
 	}
 	return positionsURL
 }
 
+// Extract details of positions
 func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) []Position {
 	positions := []Position{}
 	for _, url := range positionsURL {
 		var title, date, description string
 		c := colly.NewCollector()
+
+		// Set request timeout timer
+		c.SetRequestTimeout(60 * 5 * time.Second)
+
 		// Check if the URL has been visited before
 		if visitedUrls[url] {
 			log.Println("URL has been visited before:", url)
@@ -289,9 +113,15 @@ func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) 
 
 		})
 
+		// Add the OnRequest function to log the URLs that are visited
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println("Visiting", r.URL)
 		})
+		// Set error handler
+		c.OnError(func(r *colly.Response, err error) {
+			log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		})
+
 		c.Visit(url)
 	}
 
@@ -300,33 +130,38 @@ func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) 
 
 func main() {
 
-	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Define name of the table for the University of Helsinki positions
+	tableName := "uva_nl"
 
 	log.Println("Connecting to the 'fenjan' database 🐰.")
-	db, err := sql.Open("mysql", getDbConnectionString())
+	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("Creating the 'kth_se' table in the 'fenjan' database if not exists 👾.")
-	createTableIfNotExists(db)
+	log.Println("Creating the '" + tableName + "' table in the 'fenjan' database if not exists 👾.")
+	tea.CreateTableIfNotExists(db, tableName)
 
 	// Get the URLs from the database
-	visitedUrls := getUrlsFromDB(db)
+	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
-	log.Println("Searching the KTH Royal Institute of Technology  for the Ph.D. vacancies 🦉.")
+	log.Println("Searching the UvA University of Amsterdam  for the Ph.D. vacancies 🦉.")
 
+	log.Println("Finding the total number of open positions advertised on the university website 🦎...")
 	numPositions := findNumActivePositions()
+
+	if numPositions == 0 {
+		log.Fatal("There is an error in getting the data, The total number of open positions in equal to 0 ☠️ !")
+	}
+	log.Printf("Currently, there are %d open positions advertised on the website.", numPositions)
+
 	positionsURL := getPositionsURL(numPositions)
+
 	log.Println("Found ", len(positionsURL), "open positions.")
 	positions := extractPositionDetails(positionsURL, visitedUrls)
-	log.Println("Extracted details of", len(positions), "open positions 🤓.")
+	log.Println("Extracted details of", len(positions), "Ph.D. new open positions 🤓.")
 	log.Println("Saving new positions to the database 🚀...")
-	savePositionsToDB(db, positions)
+	tea.SavePositionsToDB(db, positions, tableName)
 
 	log.Println("Finished 🫡!")
 }
