@@ -47,10 +47,17 @@ func extractPositionDescription(url string) string {
 `
 		description = strings.Replace(description, junkText, "", -1)
 	})
+
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
+
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+	})
+
 	c.Visit(url)
 	return description
 }
@@ -69,8 +76,13 @@ func getPositions(visitedUrls map[string]bool) []Position {
 		}
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
+	})
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
 	})
 	c.Visit("https://www.kth.se/en/om/work-at-kth/doktorander-1.572201")
 	return positions
