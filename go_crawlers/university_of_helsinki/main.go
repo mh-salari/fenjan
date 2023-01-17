@@ -13,7 +13,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Position []struct {
+type Position struct {
 	Title         string `json:"title"`
 	URL           string `json:"url"`
 	Department    string `json:"department"`
@@ -51,7 +51,7 @@ func main() {
 	}
 
 	// Loop through each position
-	newPositions := Position{}
+	newPositions := []Position{}
 	for _, position := range positions {
 
 		// Check if the URL has been visited before
@@ -69,7 +69,7 @@ func main() {
 
 }
 
-func getAndParseData() (Position, error) {
+func getAndParseData() ([]Position, error) {
 	// Get request
 	resp, err := http.Get("https://www.helsinki.fi/en/ajax_get_jobs/en/null/null/null/0")
 	if err != nil {
@@ -91,7 +91,7 @@ func getAndParseData() (Position, error) {
 		return nil, err
 	}
 
-	var positions Position
+	var positions []Position
 	if err := json.Unmarshal([]byte(result[0].Data), &positions); err != nil { // Parse []byte to the go struct pointer
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func createTableIfNotExists(db *sql.DB) {
 }
 
 // savePositionsToDB function saves the scraped positions to a MySQL database
-func savePositionsToDB(db *sql.DB, positions Position) {
+func savePositionsToDB(db *sql.DB, positions []Position) {
 	// Prepare the SQL statement
 	stmt, err := db.Prepare("INSERT INTO helsinki_fi (title, description, url, date) VALUES (?, ?, ?, ?)")
 	if err != nil {
