@@ -1,4 +1,4 @@
-module fenjan.ai-hue.ir/tampere
+module fenjan.ai-hue.ir/university_of_tampere
 
 replace fenjan.ai-hue.ir/tea => ../tea
 
