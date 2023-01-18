@@ -11,6 +11,7 @@ import os
 import random
 from datetime import datetime
 from urlextract import URLExtract
+from utils.send_email import send_email
 
 
 def format_position_summery_text(text):
@@ -98,6 +99,42 @@ def compose_email(customers_name, positions_source, positions, base_path):
     footer_text = 'Developed by <a href="https://hue-salari.ir/" rel="noopener" style="text-decoration: none; color: #52a150;" target="_blank">Hue (MohammadHossein) Salari</a>'
     email_template = email_template.replace("&footer_place_holder", footer_text)
     return email_template
+
+
+def compose_and_send_email(
+    recipient_email, recipient_name, source_name, positions_list, utils_path
+):
+    """
+    Compose and send email containing positions.
+
+    Parameters:
+        recipient_email (str): Email address to send the email to.
+        recipient_name (str): Customer's name to include in the email.
+        source_name (str): Name of the source of the positions
+        positions_list (List[str]): List of positions to include in the email.
+        utils_path (str): Base path for the email template file.
+
+    Returns:
+        None
+    """
+    # generate email text using the email template and the given positions
+
+    emails_text = []
+    for (title, url, matched_keywords, date), _ in positions_list:
+        text = f'<span style="font-weight: bold">Title:</span> {title}\n'
+        text += f'\n<span style="font-weight: bold">Matched Keywords:</span>\n<span style="color:#68677b">{matched_keywords}</span>'
+        if date != "":
+            text += f'\n<span style="font-weight: bold">Apply Before:</span> {date}\n'
+        text += f"<br><br>🔗: {url}"
+        emails_text.append(text)
+    email_text = compose_email(recipient_name, source_name, emails_text, utils_path)
+    # send email with the generated text
+    send_email(
+        recipient_email,
+        f"PhD Positions from {source_name}",
+        email_text,
+        "html",
+    )
 
 
 if __name__ == "__main__":
