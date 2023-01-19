@@ -17,11 +17,51 @@ UniversityOfHelsinki = University(
 UvAUniversityOfAmsterdam = University("UvA University of Amsterdam", "uva_nl", [], [])
 
 UniversityOfTampere = University(
-    "University of Tampere", "tuni_fi", ["Doctoral Researcher"], []
+    "University of Tampere", "tuni_fi", ["Doctoral Researcher"], ["Postdoctoral"]
 )
 
 Linkoping_University = University(
     "Linköping University", "liu_se", ["PhD"], ["Postdoc"]
+)
+
+TechnicalUniversityOfMunich = University(
+    "Technical University of Munich (TUM)",
+    "tum_de",
+    ["Doctoral", "PhD", "Ph.D."],
+    ["Postdoctoral"],
+)
+
+FreieUniversitatBerlin = University(
+    "Freie Universität Berlin", "fu_berlin_de", ["PhD", "Ph.D."], []
+)
+
+KarlsruheInstituteOfTechnology = University(
+    "Karlsruhe Institute of Technology (KIT)", "kit_edu", [], []
+)
+
+UniversityOfTurku = University(
+    "University of Turku", "utu_fi", ["Doctoral Researcher"], ["Postdoctoral"]
+)
+
+LappeenrantaUniversityOfTechnology = University(
+    "Lappeenranta University of Technology",
+    "lut_fi",
+    ["Junior researcher", "PhD", "Ph.D.", "doctoral candidate"],
+    [],
+)
+UniversityOfOulu = University(
+    "University of Oulu",
+    "oulu_fi",
+    ["Doctoral Researcher", "PhD", "Ph.D."],
+    ["Postdoctoral"],
+)
+
+
+UniversityOfEasternFinland = University(
+    "University of Eastern Finland",
+    "uef_fi",
+    ["Doctoral Researcher", "PhD", "Ph.D."],
+    ["Postdoctoral"],
 )
 
 
@@ -31,4 +71,11 @@ universities = [
     UvAUniversityOfAmsterdam,
     UniversityOfTampere,
     Linkoping_University,
+    TechnicalUniversityOfMunich,
+    FreieUniversitatBerlin,
+    KarlsruheInstituteOfTechnology,
+    UniversityOfTurku,
+    LappeenrantaUniversityOfTechnology,
+    UniversityOfOulu,
+    UniversityOfEasternFinland,
 ]
