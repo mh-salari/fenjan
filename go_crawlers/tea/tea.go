@@ -51,7 +51,7 @@ func CreateTableIfNotExists(db *sql.DB, tableName string) {
 	// SQL statement to create the table
 	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
 		id INT AUTO_INCREMENT PRIMARY KEY,
-		title VARCHAR(255) NOT NULL,
+		title VARCHAR(500) NOT NULL,
 		url VARCHAR(255) NOT NULL,
 		description TEXT NOT NULL,
         date VARCHAR(255)
