@@ -124,7 +124,7 @@ def compose_and_send_email(
         text = f'<span style="font-weight: bold">Title:</span> {title}\n'
         text += f'\n<span style="font-weight: bold">Matched Keywords:</span>\n<span style="color:#68677b">{matched_keywords}</span>'
         if date != "":
-            text += f'\n<span style="font-weight: bold">Apply Before:</span> {date}\n'
+            text += f'\n<span style="font-weight: bold">Date:</span> {date}\n'
         text += f"<br><br>🔗: {url}"
         emails_text.append(text)
     email_text = compose_email(recipient_name, source_name, emails_text, utils_path)
