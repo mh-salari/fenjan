@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -61,12 +60,13 @@ func getPositionsUrls() (urls []string) {
 		}
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🐗")
+		log.Println("Visiting", r.URL)
 	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
 	})
 
@@ -88,14 +88,14 @@ func getPositionDescription(url string) Position {
 		paragraphs = append(paragraphs, strings.TrimSpace(e.Text))
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit(url)
@@ -111,6 +111,7 @@ func main() {
 
 	// Define name of the table for the Technical University of Munich (TUM)
 	tableName := "tum_de"
+
 	log.Println("Connecting to the 'fenjan' database 🐰.")
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {

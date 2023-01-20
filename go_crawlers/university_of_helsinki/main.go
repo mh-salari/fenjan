@@ -59,6 +59,7 @@ func main() {
 
 	// Define name of the table for the University of Helsinki positions
 	tableName := "helsinki_fi"
+
 	log.Println("Connecting to the 'fenjan' database 🐰.")
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {

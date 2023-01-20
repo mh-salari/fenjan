@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strings"
 
@@ -52,10 +51,10 @@ func extractPositionDescription(url string) string {
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
-
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
 	})
 
 	c.Visit(url)
@@ -78,12 +77,14 @@ func getPositions(visitedUrls map[string]bool) []Position {
 
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
 	})
+
 	c.Visit("https://www.kth.se/en/om/work-at-kth/doktorander-1.572201")
 	return positions
 }
@@ -105,7 +106,7 @@ func main() {
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
-	log.Println("Searching the KTH Royal Institute of Technology  for the Ph.D. vacancies 🦉.")
+	log.Println("Searching the KTH Royal Institute of Technology for the Ph.D. vacancies 🦉.")
 	positions := getPositions(visitedUrls)
 	newPositions := []Position{}
 

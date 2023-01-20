@@ -21,14 +21,15 @@ func getPositionsUrlsAndDates() (urls []string, dates []string) {
 		urls = append(urls, e.ChildAttr("a", "href"))
 
 	})
+
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit("https://www.jyu.fi/en/workwithus/open-jobs")
@@ -49,14 +50,14 @@ func getPositionDescription(url string) Position {
 		description += fmt.Sprintln(strings.TrimSpace(e.Text))
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit(url)

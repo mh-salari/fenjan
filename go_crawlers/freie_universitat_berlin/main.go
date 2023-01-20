@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -52,14 +51,14 @@ func getPositionDescription(url string) Position {
 
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit(url)
@@ -72,6 +71,7 @@ func main() {
 
 	// Define name of the table for the Freie Universität Berlin
 	tableName := "fu_berlin_de"
+
 	log.Println("Connecting to the 'fenjan' database 🐰.")
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {

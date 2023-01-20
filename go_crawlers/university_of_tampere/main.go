@@ -20,10 +20,17 @@ func getPositionUrls() []string {
 	c.OnHTML("div.RSSFeedLiftup__StyledWrapper-sc-bi69hc-0.fbpMqB a[href]", func(e *colly.HTMLElement) {
 		positionUrls = append(positionUrls, e.Attr("href"))
 	})
+
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
+	})
+
 	c.Visit("https://www.tuni.fi/en/about-us/working-at-tampere-universities/open-positions-at-tampere-university")
 	return positionUrls
 }
@@ -32,6 +39,7 @@ func getPositionUrls() []string {
 func extractPositionDetails(url string) (string, string) {
 	// Create a new collector
 	c := colly.NewCollector()
+
 	var title, description string
 	// Find the title in h1 element
 	c.OnHTML("h1", func(e *colly.HTMLElement) {
@@ -41,10 +49,17 @@ func extractPositionDetails(url string) (string, string) {
 	c.OnHTML("p", func(e *colly.HTMLElement) {
 		description += e.Text + " "
 	})
+
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
+	})
+
 	c.Visit(url)
 	return title, description
 }

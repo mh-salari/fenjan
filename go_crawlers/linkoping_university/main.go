@@ -32,7 +32,8 @@ func getPositionsUrls() []string {
 	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
 	})
 
 	c.Visit("https://liu.se/en/work-at-liu/vacancies")
@@ -63,8 +64,10 @@ func extractPositionsDetails(url string) Position {
 	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
+		r.Request.Retry()
 	})
+
 	c.Visit(url)
 	position.URL = url
 	return position

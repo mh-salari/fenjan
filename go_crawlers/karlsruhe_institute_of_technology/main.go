@@ -22,14 +22,14 @@ func getPositionsUrlsFromRSS() (urls []string) {
 
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit("https://www.pse.kit.edu/english/karriere/121.php")
@@ -60,14 +60,14 @@ func getPositionDescription(url string) Position {
 
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit(url)

@@ -68,11 +68,12 @@ func getPositionsURL(numPositions int) []string {
 
 		// Add the OnRequest function to log the URLs that are visited
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL)
+			log.Println("Visiting", r.URL)
 		})
 		// Set error handler
 		c.OnError(func(r *colly.Response, err error) {
-			log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+			log.Println("Request failed ☠️!", "Error:", err)
+			r.Request.Retry()
 		})
 
 		c.Visit(url)
@@ -115,11 +116,12 @@ func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) 
 
 		// Add the OnRequest function to log the URLs that are visited
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL)
+			log.Println("Visiting", r.URL)
 		})
 		// Set error handler
 		c.OnError(func(r *colly.Response, err error) {
-			log.Fatal("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+			log.Println("Request failed ☠️!", "Error:", err)
+			r.Request.Retry()
 		})
 
 		c.Visit(url)

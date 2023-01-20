@@ -21,14 +21,14 @@ func getPositionsUrls() (urls []string) {
 
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit("https://rekry.saima.fi/certiahome/open_jobs_view_new.html?did=5600&jc=14&lang=en")
@@ -52,14 +52,14 @@ func getPositionDescription(url string) Position {
 		description += fmt.Sprintln(strings.TrimSpace(e.Text))
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit(url)

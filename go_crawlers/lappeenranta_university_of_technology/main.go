@@ -25,14 +25,14 @@ func getPositionsUrlsAndDates() (urls []string, dates []string) {
 		}
 	})
 
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println("Request failed ☠️!", "Error:", err)
+		log.Println("Request failed ☠️!", "Error:", err)
 		r.Request.Retry()
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL, "🦍")
 	})
 
 	c.Visit("https://lut.rekrytointi.com/paikat/index.php?o=A_LOJ&list=2")
@@ -42,6 +42,7 @@ func getPositionsUrlsAndDates() (urls []string, dates []string) {
 func getPositionDescription(url string) Position {
 	var description string
 	var title string
+
 	c := colly.NewCollector()
 	c.SetRequestTimeout(60 * time.Second)
 
@@ -88,7 +89,7 @@ func main() {
 
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
-
+	fmt.Println(visitedUrls)
 	log.Println("Finding URLs of open positions in Lappeenranta University of Technology 🦉.")
 	positionsUrl, positionsDate := getPositionsUrlsAndDates()
 	log.Printf("Found %d open positions", len(positionsUrl))
@@ -96,7 +97,7 @@ func main() {
 	// Loop through each position
 	positions := []Position{}
 	for idx, url := range positionsUrl[:] {
-
+		fmt.Println(url)
 		// Check if the URL has been visited before
 		if visitedUrls[url] {
 			log.Println("URL has been visited before:", url)
