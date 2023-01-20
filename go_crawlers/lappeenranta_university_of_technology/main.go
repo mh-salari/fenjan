@@ -19,9 +19,10 @@ func getPositionsUrlsAndDates() (urls []string, dates []string) {
 	c.OnHTML("div.auto_list.auto_list_open_jobs tr", func(e *colly.HTMLElement) {
 		date := e.ChildText("td:last-child")
 		url := e.Request.AbsoluteURL(e.ChildAttr("td:last-child a", "href"))
+
 		if date != "" && url != "" {
 			dates = append(dates, date)
-			urls = append(urls, url)
+			urls = append(urls, url[:strings.Index(url, "&rspvt=")])
 		}
 	})
 
@@ -89,7 +90,7 @@ func main() {
 
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
-	fmt.Println(visitedUrls)
+
 	log.Println("Finding URLs of open positions in Lappeenranta University of Technology 🦉.")
 	positionsUrl, positionsDate := getPositionsUrlsAndDates()
 	log.Printf("Found %d open positions", len(positionsUrl))
@@ -97,7 +98,7 @@ func main() {
 	// Loop through each position
 	positions := []Position{}
 	for idx, url := range positionsUrl[:] {
-		fmt.Println(url)
+
 		// Check if the URL has been visited before
 		if visitedUrls[url] {
 			log.Println("URL has been visited before:", url)
