@@ -16,18 +16,6 @@ import (
 
 type Position = tea.Position
 
-// https://play.golang.org/p/Qg_uv_inCek
-// contains checks if a string is present in a slice
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Find total number of active position current;y advertised on UvA University of Amsterdam
 func findNumActivePositions() int {
 	c := colly.NewCollector(
@@ -61,7 +49,7 @@ func getPositionsURL(numPositions int) []string {
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 			href := "https://vacatures.uva.nl" + e.Attr("href")
 
-			if strings.Contains(strings.ToLower(e.Text), "phd") && !contains(positionsURL, href) {
+			if strings.Contains(strings.ToLower(e.Text), "phd") && !tea.Contains(positionsURL, href) {
 				positionsURL = append(positionsURL, href)
 			}
 		})
