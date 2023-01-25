@@ -71,7 +71,7 @@ func getPositionDescription(url string) (position Position) {
 
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
-		log.Println("Request failed ☠️!", "Error:", err, "Retrying 🧌!")
+		log.Println("Request failed ☠️!", "Error:", err)
 
 		// Sleep if its a 429 Too Many Requests Error
 		if r.StatusCode == 429 {
