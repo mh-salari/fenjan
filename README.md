@@ -2,7 +2,7 @@
 
 ![](https://ai-hue.ir/fenjan_phd_finder/logo/logo06_r.png)
 
-Fenjan is a Python bot that searches Twitter and LinkedIn for PhD positions and sends emails to customers based on their keywords.
+Fenjan is a Python bot that searches Twitter and LinkedIn for advertised Ph.D. positions and and many university website for vacant Ph.D. positions sends emails to customers based on their keywords.
 
 ## Installation
 
