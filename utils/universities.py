@@ -70,6 +70,14 @@ ChalmersUniversityOfTechnology = University(
 
 AaltoUniversity = University("Aalto University", "aalto_fi", [], [])
 
+LundUniversity = University(
+    "Lund University",
+    "lunduniversity_lu_se",
+    ["Doctoral Student", "PhD", "Ph.D."],
+    ["Postdoctoral"],
+)
+
+UppsalaUniversity = University("UppsalaUniversity", "uu_se", [], [])
 
 universities = [
     KTHRoyalInstituteOfTechnology,
@@ -86,4 +94,6 @@ universities = [
     UniversityOfEasternFinland,
     ChalmersUniversityOfTechnology,
     AaltoUniversity,
+    LundUniversity,
+    UppsalaUniversity,
 ]
