@@ -3,130 +3,169 @@ package main
 import (
 	"database/sql"
 	"log"
+	"math/rand"
 	"strings"
+	"time"
 
+	"fenjan.ai-hue.ir/logger"
 	"fenjan.ai-hue.ir/tea"
 	"github.com/gocolly/colly"
 )
 
+// Set the university name, the database table name for this university, and the url of vacant positions
+var uniName string = "KTH Royal Institute of Technology"
+var tableName string = "kth_se"
+var vacantPositionsUrl string = "https://www.kth.se/en/om/work-at-kth/doktorander-1.572201"
+
+// Get Position type from tea helper package
 type Position = tea.Position
 
-// extractPositionDescription function uses colly to scrape a position page and finds the title and text of the position
-func extractPositionDescription(url string) string {
-	// Create a new collector
+// get the URL, Title and Date of all vacant positions
+func getPositionsUrlsAndTitleAndDate() (positions []Position) {
+
 	c := colly.NewCollector()
-	var description string
+	c.SetRequestTimeout(60 * time.Second)
+
+	c.OnHTML("tr", func(e *colly.HTMLElement) {
+		title := e.ChildText("a")
+		url := e.ChildAttr("a", "href")
+		date := e.ChildText("td:last-child")
+
+		if url != "" {
+			positions = append(positions, Position{title, url, "", date})
+		}
+
+	})
+
+	// Add the OnRequest function to log the URLs that are visited
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL, "🥷")
+	})
+
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		log.Println("Request failed ☠️!", "Error:", err)
+
+		// Sleep if its a 429 Too Many Requests Error
+		if r.StatusCode == 429 {
+			rand.Seed(time.Now().UnixNano())
+			n := 30 + rand.Intn(60)
+			log.Printf("Sleeping %d seconds...\n", n)
+			time.Sleep(time.Duration(n) * time.Second)
+		}
+
+		// Retry for 5 time
+		retriesLeft := tea.RetryRequest(r, 5)
+		if retriesLeft == 0 {
+			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+		}
+	})
+
+	c.Visit(vacantPositionsUrl)
+
+	return positions
+}
+
+// Get the details of position
+func getPositionDescription(url string) (description string) {
+
+	c := colly.NewCollector()
+	c.SetRequestTimeout(60 * time.Second)
+
 	c.OnHTML("div.content-wrap", func(e *colly.HTMLElement) {
 		description = e.Text
 
 		junkText := `$(document).ready(function() {
-            function initializeAddThis() {
-                $.getScript('//s7.addthis.com/js/300/addthis_widget.js#pubid=mynetwork', function() {
-                    addthis_config = {
-                        username: 'mynetwork',
-                        ui_language  : 'en'
-                    }
-                    var addthis_share = {
-                        url_transforms : {
-                            add: {
-                                referring_service:
-                                '{{code}}'
-                                                                            }
-                        }
-                    }
-                });
-            }
-
-                            document.addEventListener('cookieConsent', function(event) {
-                    if (event.detail.cookieClassification.includes('Marketing')) {
-                        initializeAddThis();
-                    }
-                });
-                    });
-`
+			function initializeAddThis() {
+				$.getScript('//s7.addthis.com/js/300/addthis_widget.js#pubid=mynetwork', function() {
+					addthis_config = {
+						username: 'mynetwork',
+						ui_language  : 'en'
+					}
+					var addthis_share = {
+						url_transforms : {
+							add: {
+								referring_service:
+								'{{code}}'
+																			}
+						}
+					}
+				});
+			}
+	
+							document.addEventListener('cookieConsent', function(event) {
+					if (event.detail.cookieClassification.includes('Marketing')) {
+						initializeAddThis();
+					}
+				});
+					});
+	`
 		description = strings.Replace(description, junkText, "", -1)
 	})
 
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL, "🥷")
 	})
+
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
 		log.Println("Request failed ☠️!", "Error:", err)
-		r.Request.Retry()
-	})
 
-	c.Visit(url)
-	return description
-}
+		// Sleep if its a 429 Too Many Requests Error
+		if r.StatusCode == 429 {
+			rand.Seed(time.Now().UnixNano())
+			n := 30 + rand.Intn(60)
+			log.Printf("Sleeping %d seconds...\n", n)
+			time.Sleep(time.Duration(n) * time.Second)
+		}
 
-func getPositions(visitedUrls map[string]bool) []Position {
-
-	c := colly.NewCollector()
-	positions := []Position{}
-	// Find and visit all links
-	c.OnHTML("tr", func(e *colly.HTMLElement) {
-		title := e.ChildText("a")
-		url := e.ChildAttr("a", "href")
-		date := e.ChildText("td:last-child")
-		if url != "" {
-			positions = append(positions, Position{title, url, "", date})
+		// Retry for 5 time
+		retriesLeft := tea.RetryRequest(r, 5)
+		if retriesLeft == 0 {
+			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
 		}
 	})
 
-	// Add the OnRequest function to log the URLs that are visited
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
-	})
-	// Set error handler
-	c.OnError(func(r *colly.Response, err error) {
-		log.Println("Request failed ☠️!", "Error:", err)
-		r.Request.Retry()
-	})
+	c.Visit(url)
 
-	c.Visit("https://www.kth.se/en/om/work-at-kth/doktorander-1.572201")
-	return positions
+	return description
+
 }
 
 func main() {
 
-	// Define table name for  KTH Royal Institute of Technology positions
-	tableName := "kth_se"
-
+	// Connecting to the database and creating the university table if not exist
 	log.Println("Connecting to the 'fenjan' database 🐰.")
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Creating the " + tableName + " table in the 'fenjan' database if not exists 👾.")
+	log.Printf("Creating the '%s' table in the 'fenjan' database if not exists 👾.", tableName)
 	tea.CreateTableIfNotExists(db, tableName)
 
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
-	log.Println("Searching the KTH Royal Institute of Technology for the Ph.D. vacancies 🦉.")
-	positions := getPositions(visitedUrls)
-	newPositions := []Position{}
+	// Getting the URL of vacant positions on the university site
+	log.Printf("Searching the %s for the Ph.D. vacancies 🦉.", uniName)
+	positions := getPositionsUrlsAndTitleAndDate()
+	log.Println("Found ", len(positions), " open positions 🐝")
 
-	// Loop through each URL and get the title and text of each position
-	for _, position := range positions[:] {
+	// Extract description of the positions
+	for idx, position := range positions {
 		// Check if the URL has been visited before
 		if visitedUrls[position.URL] {
 			log.Println("URL has been visited before:", position.URL)
 			continue
 		}
-
-		// Extract description of new positions and add them to a new slice
-		description := extractPositionDescription(position.URL)
-		newPositions = append(newPositions, Position{position.Title, position.URL, description, position.Date})
+		positions[idx].Description = getPositionDescription(position.URL)
 	}
+	log.Println("Extracted details of", len(positions), "open positions 🤓.")
 
-	log.Println("Extracted description of", len(newPositions), "open positions 🤓.")
-
+	// Saving the positions to the database
 	log.Println("Saving new positions to the database 🚀...")
-	tea.SavePositionsToDB(db, newPositions, tableName)
+	tea.SavePositionsToDB(db, positions, tableName)
 
 	log.Println("Finished 🫡!")
 
