@@ -3,20 +3,27 @@ package main
 import (
 	"database/sql"
 	"log"
+	"math/rand"
 	"time"
 
+	"fenjan.ai-hue.ir/logger"
 	"fenjan.ai-hue.ir/tea"
 	"github.com/gocolly/colly"
 )
 
+// Set the university name, the database table name for this university, and the url of vacant positions
+var uniName string = "Linköping University"
+var tableName string = "liu_se"
+var vacantPositionsUrl string = "https://liu.se/en/work-at-liu/vacancies"
+
+// Get Position type from tea helper package
 type Position = tea.Position
 
-func getPositionsUrls() []string {
-	var urls []string
+// get the URL of all vacant positions
+func getPositionsUrlsAndDates() (urls []string, dates []string) {
 
 	c := colly.NewCollector()
-	// Set request timeout timer
-	c.SetRequestTimeout(60 * 5 * time.Second)
+	c.SetRequestTimeout(60 * time.Second)
 
 	// Extract URL of positions
 	c.OnHTML("table#jobListingsTable tr", func(e *colly.HTMLElement) {
@@ -24,29 +31,43 @@ func getPositionsUrls() []string {
 		if url != "" {
 			urls = append(urls, url)
 		}
+		dates = append(dates, e.ChildText("td:nth-child(2)"))
 	})
 
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL, "🥷")
 	})
+
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
 		log.Println("Request failed ☠️!", "Error:", err)
-		r.Request.Retry()
+
+		// Sleep if its a 429 Too Many Requests Error
+		if r.StatusCode == 429 {
+			rand.Seed(time.Now().UnixNano())
+			n := 30 + rand.Intn(60)
+			log.Printf("Sleeping %d seconds...\n", n)
+			time.Sleep(time.Duration(n) * time.Second)
+		}
+
+		// Retry for 5 time
+		retriesLeft := tea.RetryRequest(r, 5)
+		if retriesLeft == 0 {
+			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+		}
 	})
 
-	c.Visit("https://liu.se/en/work-at-liu/vacancies")
+	c.Visit(vacantPositionsUrl)
 
-	return urls
+	return urls, dates
 }
 
-func extractPositionsDetails(url string) Position {
-	var position Position
-	c := colly.NewCollector()
+// Get the details of position
+func getPositionDescription(url string) (position Position) {
 
-	// Set request timeout timer
-	c.SetRequestTimeout(60 * 5 * time.Second)
+	c := colly.NewCollector()
+	c.SetRequestTimeout(60 * time.Second)
 
 	// Extract title of the position
 	c.OnHTML("h1", func(e *colly.HTMLElement) {
@@ -60,56 +81,70 @@ func extractPositionsDetails(url string) Position {
 
 	// Add the OnRequest function to log the URLs that are visited
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL, "🥷")
 	})
+
 	// Set error handler
 	c.OnError(func(r *colly.Response, err error) {
 		log.Println("Request failed ☠️!", "Error:", err)
-		r.Request.Retry()
+
+		// Sleep if its a 429 Too Many Requests Error
+		if r.StatusCode == 429 {
+			rand.Seed(time.Now().UnixNano())
+			n := 30 + rand.Intn(60)
+			log.Printf("Sleeping %d seconds...\n", n)
+			time.Sleep(time.Duration(n) * time.Second)
+		}
+
+		// Retry for 5 time
+		retriesLeft := tea.RetryRequest(r, 5)
+		if retriesLeft == 0 {
+			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+		}
 	})
 
 	c.Visit(url)
+
 	position.URL = url
+
 	return position
+
 }
 
 func main() {
 
-	// Set the name of table for the Linköping University positions
-	tableName := "liu_se"
-
+	// Connecting to the database and creating the university table if not exist
 	log.Println("Connecting to the 'fenjan' database 🐰.")
-
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Creating the 'liu_se' table in the 'fenjan' database if not exists 👾.")
+	log.Printf("Creating the '%s' table in the 'fenjan' database if not exists 👾.", tableName)
 	tea.CreateTableIfNotExists(db, tableName)
 
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
-	log.Println("Searching the Linköping University  for the Ph.D. vacancies 🦉.")
+	// Getting the URL of vacant positions on the university site
+	log.Printf("Searching the %s for the Ph.D. vacancies 🦉.", uniName)
 	positions := []Position{}
-
-	positionsUrls := getPositionsUrls()
+	positionsUrls, positionsDates := getPositionsUrlsAndDates()
+	log.Println("Found ", len(positionsUrls), " open positions 🐝")
 
 	// Extract description of the positions
-	for _, url := range positionsUrls {
+	for idx, url := range positionsUrls {
 		// Check if the URL has been visited before
 		if visitedUrls[url] {
 			log.Println("URL has been visited before:", url)
 			continue
 		}
-
-		position := extractPositionsDetails(url)
+		position := getPositionDescription(url)
+		position.Date = positionsDates[idx]
 		positions = append(positions, position)
 	}
-
 	log.Println("Extracted details of", len(positions), "open positions 🤓.")
 
+	// Saving the positions to the database
 	log.Println("Saving new positions to the database 🚀...")
 	tea.SavePositionsToDB(db, positions, tableName)
 
