@@ -36,7 +36,7 @@ func getPositionsUrlsAndDate() (urls []string, dates []string) {
 			urls = append(urls, url)
 		}
 	})
-	// Add the OnRequest function to log the URLs that are visited
+	// Add the OnRequest function to log the URLs that have visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL, "🥷")
 	})
@@ -81,7 +81,7 @@ func getPositionDescription(url string) (position Position) {
 		position.Description += fmt.Sprintln(" ", strings.TrimSpace(strings.ToValidUTF8(e.Text, "")), " ")
 
 	})
-	// Add the OnRequest function to log the URLs that are visited
+	// Add the OnRequest function to log the URLs that have visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL, "🥷")
 	})

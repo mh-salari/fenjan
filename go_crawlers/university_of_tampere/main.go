@@ -21,7 +21,7 @@ func getPositionUrls() []string {
 		positionUrls = append(positionUrls, e.Attr("href"))
 	})
 
-	// Add the OnRequest function to log the URLs that are visited
+	// Add the OnRequest function to log the URLs that have visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
@@ -50,7 +50,7 @@ func extractPositionDetails(url string) (string, string) {
 		description += e.Text + " "
 	})
 
-	// Add the OnRequest function to log the URLs that are visited
+	// Add the OnRequest function to log the URLs that have visited
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})

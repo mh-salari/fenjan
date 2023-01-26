@@ -54,7 +54,7 @@ func getPositionsURL(numPositions int) []string {
 			}
 		})
 
-		// Add the OnRequest function to log the URLs that are visited
+		// Add the OnRequest function to log the URLs that have visited
 		c.OnRequest(func(r *colly.Request) {
 			log.Println("Visiting", r.URL)
 		})
@@ -102,7 +102,7 @@ func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) 
 
 		})
 
-		// Add the OnRequest function to log the URLs that are visited
+		// Add the OnRequest function to log the URLs that have visited
 		c.OnRequest(func(r *colly.Request) {
 			log.Println("Visiting", r.URL)
 		})
