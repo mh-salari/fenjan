@@ -3,22 +3,41 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	"fenjan.ai-hue.ir/logger"
 	"fenjan.ai-hue.ir/tea"
 )
 
+// Set the university name, the database table name for this university, and the url of vacant positions
+var uniName string = "University of Helsinki"
+var tableName string = "helsinki_fi"
+var vacantPositionsUrl string = "https://www.helsinki.fi/en/ajax_get_jobs/en/null/null/null/0"
+
+// Get Position type from tea helper package
 type Position = tea.Position
 
 func getPositions() ([]Position, error) {
-	// Get request
-	resp, err := http.Get("https://www.helsinki.fi/en/ajax_get_jobs/en/null/null/null/0")
-	if err != nil {
-		fmt.Println("No response from request")
+
+	// Get html response from the URL, retry for max of 5 times
+	var resp *http.Response
+	var err error
+	for i := 0; i < 5; i++ {
+		resp, err = http.Get(vacantPositionsUrl)
+		if err == nil {
+			break
+		} else {
+			log.Println(err)
+			log.Println("Retrying 🧌!")
+		}
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Pars the response
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body) // response body is []byte
 	if err != nil {
@@ -57,26 +76,23 @@ func getPositions() ([]Position, error) {
 
 func main() {
 
-	// Define name of the table for the University of Helsinki positions
-	tableName := "helsinki_fi"
-
+	// Connecting to the database and creating the university table if not exist
 	log.Println("Connecting to the 'fenjan' database 🐰.")
 	db, err := sql.Open("mysql", tea.GetDbConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Creating to the " + tableName + " table in the 'fenjan' database if not exists 👾.")
+	log.Printf("Creating the '%s' table in the 'fenjan' database if not exists 👾.", tableName)
 	tea.CreateTableIfNotExists(db, tableName)
 
 	// Get the URLs from the database
 	visitedUrls := tea.GetUrlsFromDB(db, tableName)
 
-	log.Println("Searching the University of Helsinki  for the Ph.D. vacancies 🦉.")
+	// Getting vacant positions on the university site
+	log.Printf("Searching the %s for the Ph.D. vacancies 🦉.", uniName)
 	positions, err := getPositions()
 	if err != nil {
-		fmt.Println(err)
-		return
+		logger.Error.Fatal("Source: ", uniName, "🦂 ", "Source: ", uniName, "🦂 ", "No response from request ", err)
 	}
 
 	// Loop through each position
