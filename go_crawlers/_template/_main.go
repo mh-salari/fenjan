@@ -93,7 +93,6 @@ func getPositionDescription(url string) (position Position) {
 	position.URL = url
 
 	return position
-
 }
 
 func main() {
