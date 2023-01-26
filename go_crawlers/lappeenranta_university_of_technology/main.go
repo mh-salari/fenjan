@@ -56,7 +56,7 @@ func getPositionsUrlsAndDates() (urls []string, dates []string) {
 		// Retry for 5 time
 		retriesLeft := tea.RetryRequest(r, 5)
 		if retriesLeft == 0 {
-			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+			logger.Error.Fatal("Source: ", uniName, "🦂 ", "Reached max number of retries 🫄! ", "Error: ", err)
 		}
 	})
 
@@ -99,7 +99,7 @@ func getPositionDescription(url string) (position Position) {
 		// Retry for 5 time
 		retriesLeft := tea.RetryRequest(r, 5)
 		if retriesLeft == 0 {
-			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+			logger.Error.Fatal("Source: ", uniName, "🦂 ", "Reached max number of retries 🫄! ", "Error: ", err)
 		}
 	})
 

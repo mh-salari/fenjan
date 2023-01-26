@@ -26,7 +26,7 @@ func getPositionsUrlsFromRSS() (urls []string) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(vacantPositionsUrl)
 	if err != nil {
-		logger.Error.Fatal("Error in parsing the RSS file", err)
+		logger.Error.Fatal("Source: ", uniName, "🦂 ", "Error in parsing the RSS file", err)
 	}
 
 	for _, item := range feed.Items {
@@ -78,7 +78,7 @@ func getPositionDescription(url string) (position Position) {
 		// Retry for 5 time
 		retriesLeft := tea.RetryRequest(r, 5)
 		if retriesLeft == 0 {
-			logger.Error.Fatal("Reached max number of retries 🫄! ", "Error: ", err)
+			logger.Error.Fatal("Source: ", uniName, "🦂 ", "Reached max number of retries 🫄! ", "Error: ", err)
 		}
 	})
 
