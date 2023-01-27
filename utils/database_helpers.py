@@ -1,5 +1,7 @@
 import os
 import mysql.connector
+from datetime import datetime
+
 from dotenv import load_dotenv
 from dataclasses import dataclass
 from utils.customers_database import CustomerDatabase
@@ -12,6 +14,7 @@ class Position:
     url: str
     description: str
     date: str
+    scraped_on: datetime
 
 
 class PositionsDatabase:
@@ -61,8 +64,8 @@ class PositionsDatabase:
 
         # Fetch the rows and create a list of Position objects
         positions = []
-        for (id, title, url, descriptions, date) in cursor:
-            positions.append(Position(id, title, url, descriptions, date))
+        for (id, title, url, descriptions, date, scraped_on) in cursor:
+            positions.append(Position(id, title, url, descriptions, date, scraped_on))
 
         # Close the cursor and connection
         cursor.close()
