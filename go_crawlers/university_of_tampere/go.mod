@@ -1,10 +1,13 @@
 module fenjan.ai-hue.ir/university_of_tampere
 
-replace fenjan.ai-hue.ir/tea => ../tea
+replace fenjan.ai-hue.ir/tea => ../utils/tea
+
+replace fenjan.ai-hue.ir/logger => ../utils/logger
 
 go 1.18
 
 require (
+	fenjan.ai-hue.ir/logger v0.0.0-00010101000000-000000000000
 	fenjan.ai-hue.ir/tea v0.0.0-00010101000000-000000000000
 	github.com/gocolly/colly v1.2.0
 )
