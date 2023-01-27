@@ -149,17 +149,20 @@ func main() {
 
 	// Getting the URL of vacant positions on the university site
 	log.Printf("Searching the %s for the Ph.D. vacancies 🦉.", uniName)
-	positions := getPositionsUrlsAndTitleAndDate()
-	log.Println("Found ", len(positions), " open positions 🐝")
+	positionsUrlTitleDate := getPositionsUrlsAndTitleAndDate()
+	log.Println("Found ", len(positionsUrlTitleDate), " open positions 🐝")
 
 	// Extract description of the positions
-	for idx, position := range positions {
+	positions := []Position{}
+	for _, position := range positionsUrlTitleDate {
 		// Check if the URL has been visited before
 		if visitedUrls[position.URL] {
 			log.Println("URL has been visited before:", position.URL)
 			continue
 		}
-		positions[idx].Description = getPositionDescription(position.URL)
+		position.Description = getPositionDescription(position.URL)
+		positions = append(positions, position)
+
 	}
 	log.Println("Extracted details of", len(positions), "open positions 🤓.")
 
