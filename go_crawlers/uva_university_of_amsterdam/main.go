@@ -139,6 +139,7 @@ func extractPositionDetails(positionsURL []string, visitedUrls map[string]bool) 
 		})
 
 		c.OnScraped(func(r *colly.Response) {
+			position.URL = url
 			positions = append(positions, position)
 		})
 
