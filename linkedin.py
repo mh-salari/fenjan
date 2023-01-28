@@ -214,13 +214,17 @@ def filter_positions(all_positions, search_keywords):
     Returns:
         list: list of positions that contain at least one of the search keywords
     """
+    forbidden_keywords = ["india", "+9"]
     # initialize empty list to store matching positions
     matching_positions = []
 
     # loop through each position and check if it contains any of the search keywords
     for position in all_positions:
         if any(keyword.lower() in position.lower() for keyword in search_keywords):
-            matching_positions.append(position)
+            if not any(
+                keyword.lower() in position.lower() for keyword in forbidden_keywords
+            ):
+                matching_positions.append(position)
 
     return matching_positions
 
