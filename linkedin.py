@@ -31,7 +31,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from utils.send_email import send_email
 from utils.phd_keywords import phd_keywords
 from utils.compose_email import compose_email
-from utils.customers_data import customers_data
+from utils.database_helpers import *
 
 # Set path for logging
 log_file_path = os.path.join(
@@ -244,6 +244,11 @@ def compose_and_send_email(recipient_email, recipient_name, positions, base_path
 
 
 def main():
+
+    # Set base path and .env file path
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    dotenv_path = os.path.join(base_path, ".env")
+
     log.info("Searching LinkedIn for Ph.D. Positions")
     # get base path for utils directory
     utils_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "utils")
@@ -260,23 +265,28 @@ def main():
     log.info(f"Found {len(all_positions)} posts related to Ph.D. Positions")
     # get yesterday's date
     yesterday = datetime.today() - timedelta(days=1)
-    for customer in customers_data:
-        if customer["expiration_date"] >= yesterday:
+
+    # getting customers info from db
+    log.info("Getting customers info.")
+    customers = get_customers_info(dotenv_path)
+
+    for customer in customers:
+        if customer.expiration_date >= yesterday:
             # get customer keywords and make them lowercase and remove spaces
             keywords = set(
-                [keyword.replace(" ", "").lower() for keyword in customer["keywords"]]
-                + customer["keywords"]
+                [keyword.replace(" ", "").lower() for keyword in customer.keywords]
+                + customer.keywords
             )
             # filter positions based on customer keywords
             relevant_positions = filter_positions(all_positions, keywords)
             if relevant_positions:
                 log.info(
-                    f"Sending email containing {len(relevant_positions)} positions to: {customer['name']}"
+                    f"Sending email containing {len(relevant_positions)} positions to: {customer.name}"
                 )
-                print(f"[info]: Sending email to: {customer['name']}")
+                print(f"[info]: Sending email to: {customer.name}")
                 compose_and_send_email(
-                    customer["email"],
-                    customer["name"],
+                    customer.email,
+                    customer.name,
                     relevant_positions,
                     utils_dir_path,
                 )
