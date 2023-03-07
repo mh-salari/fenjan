@@ -24,7 +24,7 @@ from urlextract import URLExtract
 from utils.send_email import send_email
 from utils.compose_email import compose_email
 from utils.phd_keywords import phd_keywords
-from utils.customers_data import customers_data
+from utils.database_helpers import *
 
 # set up logging to a file
 log_file_path = os.path.join(
@@ -265,6 +265,11 @@ def compose_and_send_email(recipient_email, recipient_name, positions, base_path
 
 
 def main():
+
+    # Set base path and .env file path
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    dotenv_path = os.path.join(base_path, ".env")
+
     # Log message
     log.info(f"Searching Twitter for Ph.D. Positions")
 
@@ -284,14 +289,18 @@ def main():
     # Log number of tweets that have been found
     log.info(f"Found {len(phd_positions)} tweets related to Ph.D. Positions")
 
+    # getting customers info from db
+    log.info("Getting customers info.")
+    customers = get_customers_info(dotenv_path)
+
     # Loop through customers
-    for customer in customers_data:
+    for customer in customers:
         # Check if customer's expiration date is today or later
-        if customer["expiration_date"] >= datetime.today():
+        if customer.expiration_date >= datetime.today():
             # Get keywords for customer
             customer_keywords = set(
-                [keyword.replace(" ", "") for keyword in customer["keywords"]]
-                + customer["keywords"]
+                [keyword.replace(" ", "") for keyword in customer.keywords]
+                + customer.keywords
             )
 
             # Filter positions based on customer keywords
@@ -300,11 +309,11 @@ def main():
             # If there are related positions, send email to customer
             if related_positions:
                 log.info(
-                    f"Sending email containing {len(related_positions)} positions to: {customer['name']}"
+                    f"Sending email containing {len(related_positions)} positions to: {customer.name}"
                 )
-                tqdm.write(f"sending email to: {customer['name']}")
+                tqdm.write(f"sending email to: {customer.name}")
                 compose_and_send_email(
-                    customer["email"], customer["name"], related_positions, base_path
+                    customer.email, customer.name, related_positions, base_path
                 )
 
 
