@@ -272,6 +272,7 @@ def main():
 
     for customer in customers:
         if customer.expiration_date >= yesterday:
+            log.info(f"Searching for {customer.name} keywords in the founded positions")
             # get customer keywords and make them lowercase and remove spaces
             keywords = set(
                 [keyword.replace(" ", "").lower() for keyword in customer.keywords]

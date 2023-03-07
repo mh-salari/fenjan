@@ -295,6 +295,7 @@ def main():
 
     # Loop through customers
     for customer in customers:
+        log.info(f"Searching for {customer.name} keywords in the founded positions")
         # Check if customer's expiration date is today or later
         if customer.expiration_date >= datetime.today():
             # Get keywords for customer
