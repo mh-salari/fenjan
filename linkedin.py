@@ -52,7 +52,7 @@ def make_driver():
 
     # Set options for Chrome
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--headless=new")
     options.add_argument("user-data-dir=.chrome_driver_session")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -154,6 +154,7 @@ def find_positions(driver, phd_keywords):
         url = f'https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords="{keyword}"&origin=FACETED_SEARCH&sid=c%3Bi&sortBy=%22date_posted%22'
         # Load page
         driver.get(url)
+        time.sleep(5)
         # Extract positions from page source
         positions = extract_positions_text(driver.page_source)
         # Iterate through pages
